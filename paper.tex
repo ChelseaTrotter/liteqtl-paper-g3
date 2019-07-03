@@ -11,6 +11,7 @@
 \title{Real Time Genome Scan Using GPU}
 
 \author[$\ast$]{Xiaoqi Hu}
+\author[$\ast$]{Hyeonju Kim}
 \author[$\ast$]{Saunak Sen}
 
 \affil[$\ast$]{University of Tennessee Health Science Center}
@@ -28,9 +29,20 @@
 \runningauthor{Hu \textit{et al.}}
 
 \begin{abstract}
-The abstract should be written for people who may not read the entire paper, so it must stand on its own. The impression it makes usually determines whether the reader will go on to read the article, so the abstract must be engaging, clear, and concise. In addition, the abstract may be the only part of the article that is indexed in databases, so it must accurately reflect the content of the article. A well-written abstract is the  most effective way to reach intended readers, leading to more robust search, retrieval, and usage of the article. 
+The BXD strains are an important reference population of
+recombinant inbred lines which have been phenotyped extensively.
+To facilitate interactive use of genotype-phenotype relationships
+in this population, we sought to speed up eQTL scans where we
+perform a univariate genome scan for every trait in a collection
+of omic traits.  By using easily parallelizable operations such as
+matrix multiplication, vectorized operations, and elementwise
+operations, we are able to decrease runtimes approaching real-time
+computation.  We used parallelization using different CPU threads
+as well as GPUs.  We found that the speed advantage of GPUs is
+dependent on problem size and shape.  These results indicate a pathway for
+speeding up eQTL scans using LMMs.  Our implementation is in the
+Julia programming language.
 
-Please see additional guidelines notes on preparing your abstract below.
 \end{abstract}
 
 \begin{document}
@@ -50,124 +62,167 @@ Please see additional guidelines notes on preparing your abstract below.
 \correspondingauthoraffiliation{3}{Corresponding author: Please insert the affiliation correspondence address and email for the corresponding author. The corresponding author should be marked with the relevant number in the author list, as shown in the example.}
 \vspace{-34pt}% Only used for adjusting extra space in the left column of the first page
 
-\noindent This G3: Genes|Genomes|Genetics journal template is provided to help you write your work in the correct journal format. Instructions for use are provided below. Note that by default line numbers are present to aid reviewers and editors in reading and commenting on your manuscript. To remove line numbers, remove the \texttt{lineno} option from the \verb|\documentclass| declaration. 
+\noindent        Computational demands in omics are growing exponentially. For
+instance, eQTL analysis requires processing genomewide
+expression and marker data; this can take minutes, hours or
+days depending on problem size.  Scientists want to intereact
+with the results and real-time processing would be valuable.
+Our goal is to build a backend for GeneNetwork that will enable
+real-time genome scans for important genetic reference
+populations such as the BXD population.
 
-\section{Guide to using this template in Overleaf}
 
-This template is provided to help you prepare your article for submission to the \textit{Genetics}.
+\section{Methods and Data}
+\label{sec:methods:Data}
 
-\section{Author Affiliations}
+%Manuscripts submitted to G3 should contain a clear description of the experimental design in sufficient detail so that the experimental analysis could be repeated by another scientist. If the level of detail necessary to explain the protocol goes beyond two paragraphs, give a short description in the main body of the paper and prepare a detailed description for supporting information.  For example, details would include indicating how many individuals were used, and if applicable how individuals or groups were combined for analysis. If working with mutants indicate how many independent mutants were isolated. If working with populations indicate how samples were collected and whether they were random with respect to the target population.
 
-For the authors' names, indicate different affiliations with the symbols: $\ast$, $\dagger$, $\ddagger$, $\S$. After four authors, the symbols double, triple, quadruple, and so forth as required.
+\subsection{Linear Model} 
+ Let $y_i$ denote a vector of gene expressions for $n$
+individuals in the $i$-th omics trait ( $i=1,\ldots,m$).  We
+define a univariate linear model as follows:
 
-\section{Your Abstract}
+\begin{eqnarray*}
+	y_i &=& X_j \beta_j+ \epsilon_i,
+	\quad \epsilon_i \sim N(0,\sigma_i^2)
+\end{eqnarray*}
 
-In addition to the guidelines provided in the example abstract above, your abstract should:
+where ${X}_j$ is a matrix that may include the $y-$intercept with
+or without covariate(s), and the $j$-th candidate genetic marker
+($j=1,\ldots,p$).  ${\beta}_j$ is a vector of the $j$-th eQTL
+effects, and ${\epsilon}_i$ is random error.  Suppose $RSS_{0i}$
+is a residual sum of squares under the null hypothesis of no eQTL
+and $RSS_{1ij}$ is the residual sum of squares under the
+alternative for the $i$-th trait and $j$-th marker.  Then the LOD
+score for the corresponding pair can be written as:
 
-\begin{itemize}
-\item provide a synopsis of the entire article;
-\item begin with the broad context of the study, followed by specific background for the study;
-\item describe the purpose, methods and procedures, core findings and results, and conclusions of the study;
-\item emphasize new or important aspects of the research;
-\item engage the broad readership of G3 and be understandable to a diverse audience (avoid using jargon);
-\item be a single paragraph of less than 250 words;
-\item contain the full name of the organism studied;
-\item NOT contain citations or abbreviations.
+\begin{eqnarray*}
+	LOD_{ij} &=& \frac{n}{2} \log_{10} \left( \frac{RSS_{0i}}{RSS_{1ij}} \right)\\
+	&=& \frac{n}{2} \log_{10} \left( 1{-}r_{ij}^2 \right),
+\end{eqnarray*}
+where $r_{ij}$ is the correlation between the $i$-th trait and
+$j$-th marker. Note that this only works for one-df tests.  If the
+trait matrix and genotype matrix ($G$) are standardized, then the
+correlation matrix is simply $$R=Y^{'}G.$$
+%Indicate which statistical analysis has been performed and describe the method and model applied. If many genes were examined simultaneously, or many phenotypes, a multiple comparison correction should be used to control the type I error rate, or a rationale for not applying a correction must be provided. The type of correction applied should be clearly stated. It should also be clear whether the p-values reported are raw, or after correction. Corrected p-values are often appropriate, but raw p-values should be available in the supporting materials so that others may perform their own corrections. 
+
+\subsection{Acceleration Techniques}
+We used various techniques to accelerate eQTL scans. 
+\subsubsection{Multithreaded CPU operations}
+\subsubsection{Matrix and Vectorized Operations}
+\subsubsection{Single precision}
+\subsubsection{GPU operations}
+\subsubsection{Julia language}
+
+
+\subsection{Information and Availability of Datasets}
+Data from 79 BXD strains for 35556 transcripts from spleens were collected using the Affy Mouse Gene 1.0 ST array. Animals were generated by Drs. Lu, Williams, and colleagues. There were usu- ally one male and one female per strain; strain averages were used as the trait of analysis. All animals were young adults (oldest 160 days). GN accession: GN283. Marker data was available on 7321 markers; genotype probabilities were calculated using R/qtl.
+
+      \begin{figure}[!htb]
+
+	\caption{Schematic of data and correlation calculation: $Y$ is
+		the expression phenotype matrix, $G$ is the matrix of
+		genotytpes, and $R=Y^{\prime}G$ is the matrix of
+		correlations.  The LOD scores are a function of the
+		correlation matrix.}
+	\label{MatrixMult}
+	\includegraphics[scale = .4]{figs/YGmatrix.png}
+\end{figure}    
+
+%At the end of the Materials and Methods section, include a statement on reagent and data availability. Please read the Data and Reagent Policy before writing the statement. Make sure to list the accession numbers or DOIs of any data you have placed in public repositories. List the file names and descriptions of any data you will upload as supplemental information. The statement should also include any applicable IRB numbers. You may include specifications for how to properly acknowledge or cite the data.
+
+%For example: Strains are available upon request. File S1 contains detailed descriptions of all supplemental files. File S2 contains SNP ID numbers and locations. File S3 contains genotypes for each individual. Sequence data are available at GenBank and the accession numbers are listed in File S3. Gene expression data are available at GEO with the accession number: GDS1234. Code used to generate the simulated data is provided in file S4. 
+
+\section{Results}
+{\em Profiling:} Calculating correlation matrix and LOD score
+takes up to 90\% of runtime.  Both involve matrix operations
+(multiplication and elementwise operations respectively) which
+are highly parallelizable.
+      \begin{itemize}
+	\item We chose OpenBLAS library for matrix multiplication, an
+	optimized multithreaded library.  In our experiment, gslBLAS
+	(GNU Scientific Library) is 10 times slower than OpenBLAS.
+	\item We used multithreading operations whenever possible, such as
+	for elementwise operations.
+	\item We explored using single precision instead of double
+	precision.  Precision change affects both throughput (FLOPS) and
+	data transfer time.  Single precision is twice
+	as fast as double precision, and provides correct result
+	within 1e-2 tolerance (Table 1).
 \end{itemize}
 
-\section{Introduction}
-
-For the introduction, authors should be mindful of the broad readership of the journal. The introduction should set the stage for the importance of the work to a generalist reader and draw the reader in to the specific study. The scope and impact of the work should be clearly stated.
-
-In individual organisms where a mutant is being studied, the rationale for the study of that mutant must be clear to a geneticist not studying that particular organism. Similarly, study of particular phenotypes should be justified broadly and not on the basis of interest for that organism alone. General background on the importance of the genetic pathway and/or phenotype should be provided in a single, well-reasoned paragraph near the beginning of the introduction.
-
-Authors are encouraged to:
+ {\em GPUs vs CPUs:} GPUs are attractive since they provide a
+massive number of cores at a lower price range.
+Matrix multiplication and element-wise operations are amendable
+to GPU's heterogeneous computing architecture, since both have
+no data race conditions and low data dependencies.
 
 \begin{itemize}
-\item cite the supporting literature completely rather than select a subset of citations;
-\item provide important background citations, including relevant review papers (to help orient the non-specialist reader);
-\item to cite similar work in other organisms.
+	\item Matrix multiplication is up to 5 times faster
+	compared to 16-threaded CPU.
+	% We compared the speed of matrix
+	% multiplication on CPU and GPU, with matrix sizes
+	% ranging from 1k to 100k.
+	We found speed
+	up is sensitive to the size and the shape of matrices.
+	% GPU is best used for large number of operations, therefore
+	% multiplying larger matrices will give better speed up.  The
+	% shape of matrices also plays an important role when the matrix
+	% size is large enough.
+	Figure 2 shows the speedup of matrix
+	multiplication, when the total data size of input and output
+	floating point matrices is over 12 GB.
+	% Our reasoning for such
+	% sensitivity is that the data transfer from GPU(device) to
+	% CPU(host) is half of CPU to GPU.
+	When output data size is
+	larger than input matrix, the speed up will decrease. 
+	\item  GPU profiling shows that 98\% of eQTL scan for BXD
+	spleen dataset is spent on data transfer.
+	Minimizing data transfer time will make the scan significantly
+	faster.
 \end{itemize}
 
-\section{Materials and Methods}
-\label{sec:materials:methods}
+      {\em Julia as development platform:} In our experiment
+of matrix multiplication, Julia's speed is comparable to C/C++.
+However, the low learning curve, clean syntax, as well as
+support to GPU programming libraries such as CUDAnative and
+CuArrays affords much lower programming efforts compared to
+C/C++.
 
-Manuscripts submitted to G3 should contain a clear description of the experimental design in sufficient detail so that the experimental analysis could be repeated by another scientist. If the level of detail necessary to explain the protocol goes beyond two paragraphs, give a short description in the main body of the paper and prepare a detailed description for supporting information.  For example, details would include indicating how many individuals were used, and if applicable how individuals or groups were combined for analysis. If working with mutants indicate how many independent mutants were isolated. If working with populations indicate how samples were collected and whether they were random with respect to the target population.
-
-\subsection{Statistical Analysis} 
-
-Indicate which statistical analysis has been performed and describe the method and model applied. If many genes were examined simultaneously, or many phenotypes, a multiple comparison correction should be used to control the type I error rate, or a rationale for not applying a correction must be provided. The type of correction applied should be clearly stated. It should also be clear whether the p-values reported are raw, or after correction. Corrected p-values are often appropriate, but raw p-values should be available in the supporting materials so that others may perform their own corrections. 
-
-\subsection{Data Availability}
-
-At the end of the Materials and Methods section, include a statement on reagent and data availability. Please read the Data and Reagent Policy before writing the statement. Make sure to list the accession numbers or DOIs of any data you have placed in public repositories. List the file names and descriptions of any data you will upload as supplemental information. The statement should also include any applicable IRB numbers. You may include specifications for how to properly acknowledge or cite the data.
-
-For example: Strains are available upon request. File S1 contains detailed descriptions of all supplemental files. File S2 contains SNP ID numbers and locations. File S3 contains genotypes for each individual. Sequence data are available at GenBank and the accession numbers are listed in File S3. Gene expression data are available at GEO with the accession number: GDS1234. Code used to generate the simulated data is provided in file S4. 
-
-\section{Results and Discussion}
-
-The results and discussion should not be repetitive. The results section should give a factual presentation of the data and all tables and figures should be referenced; the discussion should not summarize the results but provide an interpretation of the results, and should clearly delineate between the findings of the particular study and the possible impact of those findings in a larger context. Authors are encouraged to cite recent work relevant to their interpretations. Present and discuss results only once, not in both the Results and Discussion sections. It is sometimes acceptable to combine results and discussion. The text should be as succinct as possible. Heed Strunk and White's dictum: "Omit needless words!"
-
-\section{Additional guidelines}
-
-\subsection{Numbers} In the text, write out numbers nine or less except as part of a date, a fraction or decimal, a percentage, or a unit of measurement. Use Arabic numbers for those larger than nine, except as the first word of a sentence; however, try to avoid starting a sentence with such a number.
-
-\subsection{Units} Use abbreviations of the customary units of measurement only when they are preceded by a number: "3 min" but "several minutes". Write "percent" as one word, except when used with a number: "several percent" but "75\%." To indicate temperature in centigrade, use ° (for example, 37°); include a letter after the degree symbol only when some other scale is intended (for example, 45°K).
-
-\subsection{Nomenclature and Italicization} Italicize names of organisms even when  when the species is not indicated.  Italicize the first three letters of the names of restriction enzyme cleavage sites, as in HindIII. Write the names of strains in roman except when incorporating specific genotypic designations. Italicize genotype names and symbols, including all components of alleles, but not when the name of a gene is the same as the name of an enzyme. Do not use "+" to indicate wild type. Carefully distinguish between genotype (italicized) and phenotype (not italicized) in both the writing and the symbolism.
-
-\subsection{Cross References}
-Use the \verb|\nameref| command with the \verb|\label| command to insert cross-references to section headings. For example, a \verb|\label| has been defined in the section \nameref{sec:materials:methods}.
-
-\section{In-text Citations}
-
-Add citations using the \verb|\citep{}| command, for example \citep{neher2013genealogies} or for multiple citations, \citep{neher2013genealogies, rodelsperger2014characterization}.
-
-For examples of different references, please see the example bibliography file (accessible via the Project menu in the Overleaf editor). This contains examples of articles \citep{neher2013genealogies, rodelsperger2014characterization}, a book \citep{Sturtevent2001}, a book chapter \citep{Sturtevent2001chp7}, ahead-of-print work \citep{Starita2015}, a preprint \citep{Falush16} and software \citep{Kruijer2015}.
-
-\section{Examples of Article Components}
-\label{sec:examples}
-
-The sections below show examples of different header levels, which you can use in the primary sections of the manuscript (Results, Discussion, etc.) to organize your content.
-
-\section{First level section header}
-
-Use this level to group two or more closely related headings in a long article.
-
-\subsection{Second level section header}
-
-Second level section text.
-
-\subsubsection{Third level section header:}
-
-Third level section text. These headings may be numbered, but only when the numbers must be cited in the text. 
-
-\section{Figures and Tables}
-
-Figures and Tables should be labelled and referenced in the standard way using the \verb|\label{}| and \verb|\ref{}| commands.
-
-\subsection{Sample Figure}
-
-Figure \ref{fig:spectrum} shows an example figure.
-
-\begin{figure}[htbp]
-
-\label{fig:spectrum}
-\end{figure}
+\begin{figure}[!htb]
+	\centering
+	\caption{Variation of GPU vs CPU speedup with matrix shape
+	}
+	\label{GPUCPUShape}
+	\includegraphics[scale = 0.4]{figs/speedup.png}
+\end{figure} 
 
 
-\begin{figure}[htbp]
+\subsection{Platform}
+ \begin{itemize}
+	\item CPU: Intel Xeon Gold 6148; 40 cores @ 2.40GHz, 192GB 
+	\item GPU: Tesla V100-PCIE; 5120 Cores @ 1380 MHz, 16GB
+\end{itemize}
+Software: 
+\begin{itemize}
+	\item Programming environment: Julia; CentOS 7
+	\item Libraries: CUDA v10.1 and cuBLAS; OpenBLAS
+	\item Profilers: Julia Profiler Package; nvprof
+\end{itemize}
 
-\label{video:spectrum}
-\end{figure}
+%The results and discussion should not be repetitive. The results section should give a factual presentation of the data and all tables and figures should be referenced; the discussion should not summarize the results but provide an interpretation of the results, and should clearly delineate between the findings of the particular study and the possible impact of those findings in a larger context. Authors are encouraged to cite recent work relevant to their interpretations. Present and discuss results only once, not in both the Results and Discussion sections. It is sometimes acceptable to combine results and discussion. The text should be as succinct as possible. Heed Strunk and White's dictum: "Omit needless words!"
+
+
+\section{Conclusion}
+
+
+
 
 
 \subsection{Sample Table}
 
-Table \ref{tab:shape-functions} shows an examplex table. Avoid shading, color type, line drawings, graphics, or other illustrations within tables. Use tables for data only; present drawings, graphics, and illustrations as separate figures. Histograms should not be used to present data that can be captured easily in text or small tables, as they take up much more space.  
-
-Tables numbers are given in Arabic numerals. Tables should not be numbered 1A, 1B, etc., but if necessary, interior parts of the table can be labeled A, B, etc. for easy reference in the text.  
-
+Table \ref{tab:shape-functions} shows an examplex table. 
 
 \begin{table*}[htbp]
 \renewcommand{\familydefault}{\sfdefault}\normalfont
@@ -187,15 +242,6 @@ Charlie & 73\% & 2 & A good attempt.\\
 \end{tableminipage}
 \end{table*}
 
-\section{Sample Equation}
-
-Let $X_1, X_2, \ldots, X_n$ be a sequence of independent and identically distributed random variables with $\text{E}[X_i] = \mu$ and $\text{Var}[X_i] = \sigma^2 < \infty$, and let
-\begin{equation}
-S_n = \frac{X_1 + X_2 + \cdots + X_n}{n}
-      = \frac{1}{n}\sum_{i}^{n} X_i
-\label{eq:refname1}
-\end{equation}
-denote their mean. Then as $n$ approaches infinity, the random variables $\sqrt{n}(S_n - \mu)$ converge in distribution to a normal $\mathcal{N}(0, \sigma^2)$.
 
 \bibliography{example-bibliography}
 
