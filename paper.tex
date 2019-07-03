@@ -109,10 +109,24 @@ correlation matrix is simply $$R=Y^{'}G.$$
 \subsection{Acceleration Techniques}
 We used various techniques to accelerate eQTL scans. 
 \subsubsection{Multithreaded CPU operations}
+ Used for multi-threaded loops whenever possible, eg. for element-wise operations
 \subsubsection{Matrix and Vectorized Operations}
+ OpenBLAS for multi-threaded matrix operations. 
+Matrix multiplication is a well studied area where the computer scientists try to apply various optimization techniques to make it run faster. 
+There are various BLAS libraries available, such as gslBLAS, OpenBLAS, etc. 
+The matrix multiplication in OpenBLAS is default multithreaded, therefore does not require extra coding effort to achieve highly efficient result. 
+ 
 \subsubsection{Single precision}
+ Faster and memory efficient; may be less accurate, but acceptable for quick scan
+Most dataset used in scientific computing are stored in double precision. 
+
+
 \subsubsection{GPU operations}
+Specialized computations such as matrix multiplications and element-wise operations; requires additional programming effort
 \subsubsection{Julia language}
+Programming simplicity of interpreted languages with speed approaching compiled languages; GPU programming and linear algebra straightforward
+\subsubsection{ Heritability grid}
+For LMMs, considering a discrete grid of heritabilities enhances parallelization
 
 
 \subsection{Information and Availability of Datasets}
