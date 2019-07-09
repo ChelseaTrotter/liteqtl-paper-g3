@@ -199,6 +199,33 @@ Data from 79 BXD strains for 35556 transcripts from spleens were collected using
 
  
 \section{Results}
+\subsection{Benefit of using linear model}
+Our method uses linear model, and simplified the genome scan process to basic matrix operations. 
+The timing of our method is shown in Table \ref{tab:speedup-table}. 
+The execution time without finding the maximum LOD score of phenotype using double precision is 0.55 second if we only use CPU. 
+Getting the same result using the same dataset from R/qtl took about 36.5 seconds. 
+
+\subsection{Benefit of using single precision}
+Table \ref{tab:speedup-table} also shows the execution time using single and double precisions. 
+In all cases, genome scan using single precision runs faster than double precision. 
+Using single precision provides benefits in 3 aspects: memory storage, data transfer, and arithmetic calculation. 
+
+\subsection{Benefit of using GPU}
+To make fair comparison for CPU and GPU, the timing shown in Table \ref{tab:speedup-table} is the total execution time for genome scan. 
+It includes the following steps (step 4 is optional):
+\begin{itemize}
+	\item Calculate standadized matrix for input matrices.
+	\item Get correlation matrix
+	\item Caclulate LOD score
+	\item Find maximum LOD score for each phenotype. 
+\end{itemize}
+
+
+
+
+
+
+
 We profiled the entire genome scan program to get a complete picture of the execution process.
 Our profiling result shows that 90\% of runtime is spent on calculating correlation matrix and LOD score. 
 Since both involve matrix operations (multiplication and elementwise operations respectively) which are highly parallelizable, we used GPU to speed up matrix operations. 
@@ -212,11 +239,11 @@ Table \ref{tab:speedup-table} shows timing between CPU and GPU
 	\begin{tableminipage}{\textwidth}
 		\begin{tabularx}{\textwidth}{XXXX}
 			\hline
-			\header Method & Precision & CPU   & GPU  \\
+			\header Method & Precision & CPU only   & CPU \& GPU  \\
 			\hline
-			\multirow{2}{*}{No Find Max} & Single    & 0.36s & 0.41s \\
+			\multirow{2}{*}{No Find Max LOD} & Single    & 0.36s & 0.41s \\
 			& Double    & 0.55s & 0.80s \\
-			\multirow{2}{*}{Find Max}    & Single    &1.54s       &0.056s       \\
+			\multirow{2}{*}{Find Max LOD}    & Single    &1.54s       &0.056s       \\
 			& Double    & 1.77s & 0.079s \\
 			\hline
 			 
