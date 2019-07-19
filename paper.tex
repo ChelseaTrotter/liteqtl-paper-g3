@@ -9,6 +9,8 @@
 % {mp} Multiparental Populations
 \usepackage{verbatim}
 \usepackage{multirow}
+%\usepackage{listings}
+\newcommand{\code}{\texttt}
 
 \title{Real Time Genome Scan Using GPU}
 
@@ -131,18 +133,39 @@ Figure \ref{MatrixMult} shows the data layout.
 We used various techniques to accelerate eQTL scans. 
 \subsubsection{Multithreaded CPU operations}
 % Used for multi-threaded loops whenever possible, eg. for element-wise operations. 
+ Our goal is to build a backend for GeneNetwork that allows researcher to interact with data in real time. 
+ Such requirement sets up the standard that the genome scan must finish within seconds.
+ To bring out the best performance of CPU, we use multithreaded operations whenever possible. 
+ Julia, our choice of programming language, provide simple yet safe syntax for multithreading. 
+ It is simply done by adding \code{Threads.@thread} macro to indicate to Julia that the following \code{for} loop is multhreaded region. 
+ Using \code{Threads.nthreads()} function can show the number of threads in julia, and the default number of threads we use is 16 threads. 
+  
  
 \subsubsection{Matrix and Vectorized Operations}
 
 % OpenBLAS for multi-threaded matrix operations. 
-Since our algorithm largely depends on matrix operations, it is natual to find the fastest way to achieve best result. 
-There are various matrix libraries available, such as gslBLAS and OpenBLAS. 
+Since our algorithm largely depends on matrix operations, it is natual to find the fastest way to achieve best result, regardless of computing platform. 
+There are various matrix libraries available for CPU, such as gslBLAS and OpenBLAS. 
 They target different hardware or use various techniques to get highly optimal results. 
 The matrix multiplication in OpenBLAS is default multithreaded, therefore does not require extra coding effort to make the CPU version of matrix multiplication run in parallel.
+We chose OpenBLAS as CPU computing library.  
 
-Since matrix multiplication and element-wise operation are algorithmically free of data and function dependency, it is amendable to GPU's parallel computing power. 
+Matrix multiplication and element-wise operation are algorithmically free of data and function dependency, it is amendable to GPU's parallel computing power.
+Julia provides various packages for GPU including CUDA, OpenCL bindings. 
+Our chosen hardware for GPU is from Nvidia, which requires their propriatory library CUDA. 
+Besides the hardware requirement, CUDA is also mature and has been recongnized in the scientific computing community. 
+\textit{cuBLAS} library is a fast GPU implementation of the BLAS from Nvidia. 
+For matrix operations on GPU, we used cuBLAS library. 
+
+Not only we want to see how much speed up we can get from using GPU, but also experiemnt whether the shape of matrix will affect the speedup. 
+Of course, most of the time, one can not pick and choose the data size or shape he gets, 
+but such information would help researchers as a rough guidance of whether it is worth it to consider the GPU option before investing programming effort for GPU. 
 We run matrix multiplication with different shapes matrices, and compared the running time of CPU and GPU. 
-The result is shown in Figure \ref{GPUCPUShape}
+The experiment setup is, to multiply two input matrices, A(mXn), and B(nXp), and produce an output matrix C(mXp)
+The range of m, n and p is between 2\^4 and 2\^17 in log scale.
+
+The result is shown in Figure \ref{GPUCPUShape}.
+
 
 
 \begin{figure}[!htb]
@@ -213,6 +236,7 @@ To cope with this limitation, instead of off-loading the entire correlation matr
 %Programming simplicity of interpreted languages with speed approaching compiled languages; GPU programming and linear algebra straightforward
 In our experiment of matrix multiplication, Julia's speed is comparable to C/C++. 
 However, the low learning curve, clean syntax, as well as support to GPU programming libraries such as CUDAnative and CuArrays affords much lower programming efforts compared to C/C++.
+Compared to writting GPU functions in C/C++, writing in Julia is cleaner and easier, because it requires much less boiler plate code.
 %TODO: Add reference to CUDAnative and CuArrays
 
 \subsection{Information and Availability of Datasets}
