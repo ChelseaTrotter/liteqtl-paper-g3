@@ -156,15 +156,20 @@ Besides the hardware requirement, CUDA is also mature and has been recongnized i
 For matrix operations on GPU, we used cuBLAS library. 
 
 Not only we want to see how much speed up we can get from using GPU, but also experiemnt whether the shape of matrix will affect the speedup. 
-Of course, most of the time, one can not pick and choose the data size or shape he gets, 
+Of course, most of the time, one can not pick and choose the size and shape of data in matrix form, 
 but such information would help researchers as a rough guidance of whether it is worth it to consider the GPU option before investing programming effort for GPU. 
 We run matrix multiplication with different shapes matrices, and compared the running time of CPU and GPU. 
+CPU time is matrix multiplication from OpenBLAS library using 16 threads. 
+GPU time includes all overhead of using GPU, which involves device launch, data transfer and all necessary API calls.
+We think to make a fair comparison between CPU and GPU, we need to use maximum strength of both, and include all necessary cost. 
+
 The experiment setup is, to multiply two input matrices, A(mXn), and B(nXp), and produce an output matrix C(mXp)
 The range of m, n and p is between 2\^4 and 2\^17 in log scale.
-
-The result is shown in Figure \ref{GPUCPUShape}.
-
-
+Due to the GPU hardware limitations, we can only compare the result when the size of input and output (I/O size) matrix total is less than 16 GB. 
+The result is shown in Figure \ref{GPUCPUShape}. 
+The X axis of Figure \ref{GPUCPUShape} is the dimensions of matrix whose I/O size is over 12 GB.
+The Y axis is the speedup of GPU comparing to CPU in log scale.  
+From this figure, the matrices whose shape are closer to a square matrix, get better speedup from GPU. 
 
 \begin{figure}[!htb]
 	\centering
