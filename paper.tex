@@ -96,16 +96,14 @@ define a univariate linear model as follows:
 
 \begin{eqnarray*}
 	y_i &=& X_j \beta_j+ \epsilon_i,
-	\quad \epsilon_i \sim N(0,\sigma_i^2)
+	\quad \epsilon_i \sim N(0,\sigma_i^2I),
 \end{eqnarray*}
-
 where ${X}_j$ is a matrix that may include the $y-$intercept with
 or without covariate(s), and the $j$-th candidate genetic marker
 ($j=1,\ldots,p$).  ${\beta}_j$ is a vector of the $j$-th eQTL
-effects, and ${\epsilon}_i$ is random error.  Suppose $RSS_{0i}$
-is a residual sum of squares under the null hypothesis of no eQTL
-and $RSS_{1ij}$ is the residual sum of squares under the
-alternative for the $i$-th trait and $j$-th marker.  Then the LOD
+effects, and ${\epsilon}_i$ is random error distributed as $N(0,\sigma_i^2I)$.  Suppose $RSS_{0i}$
+is a residual sum of squares under the null hypothesis of no eQTL, and $RSS_{1ij}$ is the residual sum of squares under the
+alternative of existing eQTL at the $i$-th trait and $j$-th marker.  Then the LOD
 score for the corresponding pair can be written as:
 
 \begin{eqnarray*}
@@ -113,9 +111,9 @@ score for the corresponding pair can be written as:
 	&=& \frac{n}{2} \log_{10} \left( 1{-}r_{ij}^2 \right),
 \end{eqnarray*}
 where $r_{ij}$ is the correlation between the $i$-th trait and
-$j$-th marker. Note that this only works for one-df tests.  If the
-trait matrix and genotype matrix ($G$) are standardized, then the
-correlation matrix is simply $$R=Y^{'}G.$$
+$j$-th marker. Note that this only works for one-df tests.  If $Y^{\ast}$ and $G^{\ast}$ are respectively standardized 
+trait ($Y$) and genotype ($G$) matrices, then the
+correlation matrix is simply $$R=Y ^{\ast '}G^{\ast}.$$
 %Indicate which statistical analysis has been performed and describe the method and model applied. If many genes were examined simultaneously, or many phenotypes, a multiple comparison correction should be used to control the type I error rate, or a rationale for not applying a correction must be provided. The type of correction applied should be clearly stated. It should also be clear whether the p-values reported are raw, or after correction. Corrected p-values are often appropriate, but raw p-values should be available in the supporting materials so that others may perform their own corrections. 
 Figure \ref{MatrixMult} shows the data layout.
       \begin{figure}[!htb]
