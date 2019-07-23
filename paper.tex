@@ -173,7 +173,9 @@ The X axis of Figure \ref{GPUCPUShape} is the dimensions of matrix whose I/O siz
 This is because using GPU involves a lot of overhead. 
 Such overhead can only be justified by processing large data sets. 
 The Y axis is the speedup of GPU comparing to CPU in log scale.  
-From this figure, the matrices whose shape are closer to a square matrix, get better speedup from GPU. 
+From this figure, the matrices whose shape are closer to a square matrix, get better speedup from GPU.
+Matrix multiplication is up to 5 times faster on GPU compared to 16 threaded CPU. 
+
 
 \begin{figure}[!htb]
 	\centering
@@ -196,38 +198,6 @@ Considering the memory size, data transfer speed and throughput, single precisio
 
 
 \subsubsection{GPU operations}
-\iffalse
-% this block is commented out 
-	In order to achieve the goal of real time eQTL scans, we profiled the entire process of eQTL scan. Profiling can provide insightful information about the program,  such as running time of each function. 
-	Targeting the longest running time functions provides the most gain with limited programming effort and computing resources. 
-	In our profiling result, we found that the is calculating correlation matrix and LOD score takes up to 90\% of total running time. 
-	Since both steps uses matrix multiplication, which is highly parallelizable and well-researched, we choose the following approaches to speed up matrix multiplication. 
-	First, we chose OpenBLAS library for matrix multiplication, which is an optimized  multithreaded BLAS library. 
-	In our experiment, gslBLAS (GNU Scientific Library) is 10 times slower than OpenBLAS. 
-	In addition to choosing an optimized multithreaded library, we use multithreading operations whenver possible.
-	Second, we considered the possibility of using single precision compared to double precision. 
-	Precision change will affect both throughput and data transfer time. 
-	Throughput is the number of operations done in unit time, usually measured in FLOPS(floating point operations).
-	In our experiment, single precision is twice as fast as double precision, and provides correct result within 1e-2 tolerance. 
-	Detailed running time of single precision and double precision is show in Table 1. 
-	Third, we considered GPU as an attractive computing platform, because of its massive number of cores at a lower price range, and fast open source GPGPU libraries such as CUDA and OpenCL. 
-	Matrix multiplication and element-wise operations are amendable to GPU's heterogeneous computing architecture, since both have no data race conditions and low data dependencies. 
-	In our experiment, matrix multiplication is up to 5 times faster compared to 16 threaded CPU. 
-	We compared the speed of matrix multiplication on CPU and GPU, with rectangular matrix sizes ranging from 1k to 100k, increased by power of 2, 
-	We found speed up is sensitive to the size of matrix, and the shape of matrix.  
-	GPU is best used for large number of operations, therefore multiplying larger matrices will give better speed up. 
-	The shape of matrices also plays an important role when the matrix size is large enough. 
-	Figure 2 shows the speed up of matrix multiplication, when the total data size of input and output floating point matrices is over 12 GB. 
-	Our reasoning for such sensitivity is that the data transfer from GPU(device) to CPU(host) is half of CPU to GPU. 
-	When output data size is larger than input matrix, the speed up will decrease. 
-	Further experiment will be done to prove such hypothesis. 
-	In addition, our GPU profiling result shows that 98\% of eQTL scan for BXD spleen dataset is spent on data transfer for the GPU approach. 
-	Minimizing data transfer time will make the scan significantly faster. 
-	Further programming efforts will make GPU a more attractive approach to reach real time eQTL scans. 
-	Lastly but most fundamentally, we choose Julia programming language as our development tool. 
-	In our experiment of matrix multiplication, Julia's speed is comparable to C/C++. 
-	However, the low learning curve, clean syntax, as well as support to GPU programming libraries such as CUDAnative and CuArrays affords much lower programming efforts compared to C/C++.
-\fi
 
 %Specialized computations such as matrix multiplications and element-wise operations; requires additional programming effort
 Originally used in graphics, GPU has taken off as a general computing device in recent years because of its massive number of cores at a lower price range, and fast GPGPU libraries such as CUDA and OpenCL.
@@ -244,13 +214,19 @@ To cope with this limitation, instead of off-loading the entire correlation matr
 In our experiment of matrix multiplication, Julia's speed is comparable to C/C++. 
 However, the low learning curve, clean syntax, as well as support to GPU programming libraries such as CUDAnative and CuArrays affords much lower programming efforts compared to C/C++.
 Compared to writting GPU functions in C/C++, writing in Julia is cleaner and easier, because it requires much less boiler plate code.
+Below is some code snippets to demonstrate GPU code, calling library or writing custom kernel in Julia. 
 
 \inputminted{julia}{code/gpu.jl}
 %TODO: Add reference to CUDAnative and CuArrays
 
 \subsection{Information and Availability of Datasets}
-Data from 79 BXD strains for 35556 transcripts from spleens were collected using the Affy Mouse Gene 1.0 ST array. Animals were generated by Drs. Lu, Williams, and colleagues. There were usually one male and one female per strain; strain averages were used as the trait of analysis. All animals were young adults (oldest 160 days). GN accession: GN283. Marker data was available on 7321 markers; genotype probabilities were calculated using R/qtl.
-%TODO: add hippocampus data description. 
+
+We used 2 BXD data sets of mouse, spleen and hippocampus data sets to test our method. 
+Data from 79 BXD strains for 35556 transcripts from spleens were collected using the Affy Mouse Gene 1.0 ST array. GN accession: GN283. Marker data was available on 7321 markers;
+Hippocampus data for 93 strains (70 BXDs) summarized at the exon level for 1,236,087 probes/probe sets.
+GeneNetwork Accession Number: GN206
+Animals were generated by Drs. Lu, Williams, and colleagues. There were usually one male and one female per strain; strain averages were used as the trait of analysis. All animals were young adults (oldest 160 days).  genotype probabilities were calculated using R/qtl.
+
 
 \begin{table*}[htbp]
 	\renewcommand{\familydefault}{\sfdefault}\normalfont
@@ -278,6 +254,7 @@ Data from 79 BXD strains for 35556 transcripts from spleens were collected using
 
  
 \section{Results} 
+
 \subsection{Benefit of using linear model}
 Our method uses linear model, and simplified the genome scan process to basic matrix operations. 
 The timing of our method is shown in Table \ref{tab:speedup-table}. 
@@ -316,85 +293,26 @@ Result is, 98\% of time is spent on data transfer from GPU to CPU (device to hos
 As shown in Figure \ref{MatrixMult}, the input matrices Y' and G are small compared to the output matrix R.
 For BXD spleen dataset, the Y' and G matrix is about 40MB %TODO: double check on this number
 , while R matrix is about 4GB.
-For our test hardware Nvidia TESLA V100, data transfer rate from CPU to GPU (host to device) is 4.3GB/s, and GPU to CPU (device to host) is 2.2GB/s. %TODO: double check the numbers here. 
-Larger data size at a slower transfer rate makes GPU seems unattractive for computing genome scan, at least for BXD dataset.
+Data offloading is the main bottleneck for our GPU implementation. 
 
 To cope with this limitaion of GPU, we further developed \textit{Find Max LOD} method, because main interest of genome scan is to find the maximum LOD score of every phenotype. 
 This step is highly parallelizable and can utilize GPU's massive cores, at the same time, reduce the amount of data needed to be transfered back to host. 
-Table \ref{tab:speedup-table} shows that \textit{Find Max LOD} method reduces CPU\&GPU execution time down to 0.079 second when using double precision. 
-Compared to CPU only, which took 1.77 seconds, this method provides 22 times speedup. 
+Table \ref{tab:speedup-table} shows that \textit{Find Max LOD} method for spleen data reduces CPU\&GPU execution time down to 0.079 second when using double precision. 
+Compared to CPU only, which took 0.55 seconds, this GPU modification provides 7 times speedup. 
+For hippocampus datasets, which contains over 1 million phenotypes, the GPU Find Max implementation took 3.51 seconds for double precision, and 2.26 seconds for single precision. 
+As a backend service to a website, this wait time is much more preferable than the CPU timing for real time interactions. 
 
+\subsection{Software Availability}
+The source code for this package is publically available on Bitbucket: https://bitbucket.org/Xiaoqi-hu/lm-gpu.
+This repository contains three folders: \textit{data}, \textit{src} and \textit{test}. 
+Using Julia language and running \code{test.jl} in \textit{test} folder will run our method using either spleen data and hippocampus data in \textit{data} folder. 
 
-
-
-
-\iffalse
-We profiled the entire genome scan program to get a complete picture of the execution process.
-Our profiling result shows that 90\% of runtime is spent on calculating correlation matrix and LOD score. 
-Since both involve matrix operations (multiplication and elementwise operations respectively) which are highly parallelizable, we used GPU to speed up matrix operations. 
-
-
-{\em Profiling:} Calculating correlation matrix and LOD score
-takes up to 90\% of runtime.  Both involve matrix operations
-(multiplication and elementwise operations respectively) which
-are highly parallelizable.
-      \begin{itemize}
-	\item We chose OpenBLAS library for matrix multiplication, an
-	optimized multithreaded library.  In our experiment, gslBLAS
-	(GNU Scientific Library) is 10 times slower than OpenBLAS.
-	\item We used multithreading operations whenever possible, such as
-	for elementwise operations.
-	\item We explored using single precision instead of double
-	precision.  Precision change affects both throughput (FLOPS) and
-	data transfer time.  Single precision is twice
-	as fast as double precision, and provides correct result	 
-	within 1e-2 tolerance (Table 1).
-\end{itemize}
-
- {\em GPUs vs CPUs:} GPUs are attractive since they provide a
-massive number of cores at a lower price range.
-Matrix multiplication and element-wise operations are amendable
-to GPU's heterogeneous computing architecture, since both have
-no data race conditions and low data dependencies.
-
-
-\begin{itemize}
-	\item Matrix multiplication is up to 5 times faster
-	compared to 16-threaded CPU.
-	% We compared the speed of matrix
-	% multiplication on CPU and GPU, with matrix sizes
-	% ranging from 1k to 100k.
-	We found speed
-	up is sensitive to the size and the shape of matrices.
-	% GPU is best used for large number of operations, therefore
-	% multiplying larger matrices will give better speed up.  The
-	% shape of matrices also plays an important role when the matrix
-	% size is large enough.
-	Figure 2 shows the speedup of matrix
-	multiplication, when the total data size of input and output
-	floating point matrices is over 12 GB.
-	% Our reasoning for such
-	% sensitivity is that the data transfer from GPU(device) to
-	% CPU(host) is half of CPU to GPU.
-	When output data size is
-	larger than input matrix, the speed up will decrease. 
-	\item  GPU profiling shows that 98\% of eQTL scan for BXD
-	spleen dataset is spent on data transfer.
-	Minimizing data transfer time will make the scan significantly
-	faster.
-\end{itemize}
-
-      {\em Julia as development platform:} In our experiment
-of matrix multiplication, Julia's speed is comparable to C/C++.
-However, the low learning curve, clean syntax, as well as
-support to GPU programming libraries such as CUDAnative and
-CuArrays affords much lower programming efforts compared to
-C/C++.
-
-\fi
-
+This package is developed in Julia language, uses openBLAS and CUDA10.1. 
+To use this package, one needs to have an Nvidia GPU in the test machine,
+and have Julia language binary, openBLAS and CUDA library installed. 
 
 \subsection{Platform}
+Hardware:
  \begin{itemize}
 	\item CPU: Intel Xeon Gold 6148; 40 cores @ 2.40GHz, 192GB 
 	\item GPU: Tesla V100-PCIE; 5120 Cores @ 1380 MHz, 16GB
@@ -405,9 +323,6 @@ Software:
 	\item Libraries: CUDA v10.1 and cuBLAS; OpenBLAS
 	\item Profilers: Julia Profiler Package; nvprof
 \end{itemize}
-
-%The results and discussion should not be repetitive. The results section should give a factual presentation of the data and all tables and figures should be referenced; the discussion should not summarize the results but provide an interpretation of the results, and should clearly delineate between the findings of the particular study and the possible impact of those findings in a larger context. Authors are encouraged to cite recent work relevant to their interpretations. Present and discuss results only once, not in both the Results and Discussion sections. It is sometimes acceptable to combine results and discussion. The text should be as succinct as possible. Heed Strunk and White's dictum: "Omit needless words!"
-
 
 \section{Conclusion}
 
