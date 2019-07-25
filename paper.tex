@@ -183,7 +183,7 @@ CPU time is matrix multiplication from OpenBLAS library using 16 threads.
 GPU time includes all overhead of using GPU, which involves device launch, data transfer and all necessary API calls.
 We think to make a fair comparison between CPU and GPU, we need to use maximum strength of both, and include all necessary cost. 
 
-The experiment setup is, to multiply two input matrices, A(mXn), and B(nXp), and produce an output matrix C(mXp)
+The experiment setup is, to multiply two input matrices, A(m$\times$n), and B(n$\times$p), and produce an output matrix C(m$\times$p)
 The range of m, n and p is between 2\textsuperscript{4} and 2\textsuperscript{17} in log scale.
 Due to the GPU hardware limitations, we can only compare the result when the size of input and output (I/O size) matrix total is less than 16 GB. 
 The result is shown in Figure \ref{GPUCPUShape}. 
@@ -206,13 +206,13 @@ Matrix multiplication is up to 5 times faster on GPU compared to 16 threaded CPU
  
 \subsubsection{Single precision}
 % Faster and memory efficient; may be less accurate, but acceptable for quick scan
-Precision, in computer science, means the smallest difference between two representable numbers.
+Precision means the smallest difference between two representable numbers.
 Floating point numbers, in scientific computing, are usually stored in double presicision. 
 Double precision floating point numebrs takes up 8 bytes in memory, while single precision takes up 4 bytes. 
 In addition to the difference in storing size, the speed for calculation using single and double precision also varies depending on hardware. 
 For example, the GPU throughput (number of floating point calculation per second, measured in FLOPS) for double precision is 1/32 of single precision on a Nvidia GTX 1050 GPU, and 1/4 on a Nvidia Tesla K80. 
 Differences in optimization techniques, underlying architecture cause such performance gap. 
-Considering the memory size, data transfer speed and throughput, single precision brings multiple benefits when precision is not the priority concern. 
+Considering the storage size, data transfer speed and throughput, single precision brings multiple benefits when precision is not the priority concern. 
 
 
 \subsubsection{GPU operations}
@@ -316,6 +316,8 @@ To cope with this limitaion of GPU, we further developed \textit{Find Max LOD} m
 This step is highly parallelizable and can utilize GPU's massive cores, at the same time, reduce the amount of data needed to be transfered back to host. 
 Table \ref{tab:speedup-table} shows that \textit{Find Max LOD} method for spleen data reduces CPU\&GPU execution time down to 0.079 second when using double precision. 
 Compared to CPU only, which took 0.55 seconds, this GPU modification provides 7 times speedup. 
+As we mentioned earlier, since we are porting the computation to GPU which took 90\% of total execution time, according to Amdahl's Law, the theoretical maximum speed up is 10 times. 
+We got 7 times speed up for genome scan using GPU. 
 For hippocampus datasets, which contains over 1 million phenotypes, the GPU Find Max implementation took 3.51 seconds for double precision, and 2.26 seconds for single precision. 
 As a backend service to a website, this wait time is much more preferable than the CPU timing for real time interactions. 
 
