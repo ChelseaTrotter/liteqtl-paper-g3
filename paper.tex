@@ -22,7 +22,7 @@
 \author[$\dagger$]{Pjotr Prins}
 \author[$\dagger$]{Robert W. Williams}
 \author[$\S$]{Karl W. Broman}
-\author[$\ast$,1]{Saunak Sen}
+\author[$\ast$,1]{\'Saunak Sen}
 
 \affil[$\ast$]{Department of Preventive Medicine, University of Tennessee Health Science Center, Memphis, TN} 
 \affil[$\dagger$]{Department of Genetics, Genomics, and Informatics, University of Tennessee Health Science Center, Memphis, TN} 
@@ -32,7 +32,7 @@
 \keywords{Linear Model \\ Genome Scan \\ GPU}
 
 
-\runningtitle{Speeding up eQTL scans in the BxD population using GPU} % For use in the footer 
+\runningtitle{Speeding up eQTL scans in the BXD population using GPU} % For use in the footer 
 
 %% For the footnote.
 %% Give the last name of the first author if only one author;
@@ -56,7 +56,6 @@ as well as GPUs.  We found that the speed advantage of GPUs is
 dependent on problem size and shape.  These results indicate a pathway for
 speeding up eQTL scans using LMMs.  Our implementation is in the
 Julia programming language.
-
 \end{abstract}
 
 \begin{document}
@@ -76,14 +75,31 @@ Julia programming language.
 \correspondingauthoraffiliation{1}{Corresponding author: Saunak Sen, Department of Preventive Medicine, University of Tennessee Health Science Center, Memphis, TN. sen@uthsc.edu}
 \vspace{-34pt}% Only used for adjusting extra space in the left column of the first page
 
-\noindent        Computational demands in omics are growing exponentially. For
-instance, eQTL analysis requires processing genomewide
-expression and marker data; this can take minutes, hours or
-days depending on problem size.  Scientists want to intereact
-with the results and real-time processing would be valuable.
-Our goal is to build a backend for GeneNetwork that will enable
-real-time genome scans for important genetic reference
-populations such as the BXD population.
+\noindent The BXD mouse strains are an important set of recombinant
+inbred lines with deep phenotypic characterization.  Since the strains
+have been genotyped and sequenced, once a set of strains is
+phenotyped, the data can be immediately used for QTL (quantitative
+trait locus) mapping, and associational analysis with
+previously-collected phenotypes.  For ``omic'' phenotypes collected
+using high-throughput technologies additional analyses (such as
+transcriptional network construction or causal mediation analyses) are
+possible.  The GeneNetwork project ({\tt http://gn2.genenetwork.org})
+seeks to faculitate this process by providing a searchable database of
+phenotypes and genotypes in a variety of organisms (including mouse,
+rat, and Arabidopsis).  It provides a suite of interactive tools for
+browsing the data, QTL mapping, correlational analyses, network
+construction, and genome browsing.  Our goal is to develop a real-time
+backend for GeneNetwork to perform eQTL analysis (where we perform
+single-trait QTL mapping for thousands of ``omic'' traits) for
+important genetic reference populations such as the BXD population.
+
+%% Computational demands in omics are growing exponentially. For
+%% instance, eQTL analysis requires processing genomewide expression and
+%% marker data; this can take minutes, hours or days depending on problem
+%% size.  Scientists want to intereact with the results and real-time
+%% processing would be valuable.  Our goal is to build a backend for
+%% GeneNetwork that will enable real-time genome scans for important
+%% genetic reference populations such as the BXD population.
 
 Compare matrix eQTL \citep{shabalin2012matrix}, GridLMM \citep{runcie2018fast}, Bolt-LMM \citep{loh2015efficient}
 
