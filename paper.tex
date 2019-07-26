@@ -101,13 +101,47 @@ important genetic reference populations such as the BXD population.
 %% GeneNetwork that will enable real-time genome scans for important
 %% genetic reference populations such as the BXD population.
 
-Compare matrix eQTL \citep{shabalin2012matrix}, GridLMM \citep{runcie2018fast}, Bolt-LMM \citep{loh2015efficient}
+To perform eQTL scans in the BXD population, one has to simply perform
+as many genome scans as there are phenotypes.  This can be done in an
+``embarassingly parallel'' fashion by using standard algorithms for
+QTL analysis, such as those employed by R/qtl (cite).  In practice,
+this is too slow, and substantial speedups are possible.  [Mention
+  ideas that have been used before] For example, by using the
+Haley-Knott algorithms using genotype probabilities on batches of
+phenotypes with the same missing data pattern, instead of using the EM
+algorithm on each phenotype individually, substantial speedups are
+possible.  This is a well-known trick and is used by R/qtl.
+Additionally, if only additive effects are tested, or if the
+population has only two genotype categories (as in a backcross or
+recombinant inbred line), then matrix multiplication can be used to
+perform Haley-Knott regression \citep{shabalin2012matrix}.
 
+%% Compare matrix eQTL GridLMM \citep{runcie2018fast}, Bolt-LMM
+%% \citep{loh2015efficient}
+
+We sought to build upon these efforts aiming to perform real-time eQTL
+scans for the BXD populations.  We used the above-mentioned ideas and
+examined the use of graphical processing units (GPUs) to speed these
+further.  Since programming for GPUs is often non-trivial needing the
+use of low-level languages such as C++, we used the Julia programming
+language which offers a GPU programming capabilities while retaining
+the simplicity of a high-level language such as R or Matlab.  Finally,
+since most phenotype-marker associations are null, we examined the
+impact of storage precision, and only returning the highest
+association (LOD) score for each phenotype instead of a matrix of LOD
+scores for every pair of marker and phenotypes.  With these efforts,
+we find that it is possible to perform perform real-time eQTL scans
+for the BXD population.
 
 \section{Methods and Data}
 \label{sec:methods:Data}
 
 %Manuscripts submitted to G3 should contain a clear description of the experimental design in sufficient detail so that the experimental analysis could be repeated by another scientist. If the level of detail necessary to explain the protocol goes beyond two paragraphs, give a short description in the main body of the paper and prepare a detailed description for supporting information.  For example, details would include indicating how many individuals were used, and if applicable how individuals or groups were combined for analysis. If working with mutants indicate how many independent mutants were isolated. If working with populations indicate how samples were collected and whether they were random with respect to the target population.
+
+\subsection{BXD genotypes and phenotypes}
+
+Describe genotype and phenotype data here.
+
 
 \subsection{Linear Model} 
  Let $y_i$ denote a vector of gene expressions for $n$
