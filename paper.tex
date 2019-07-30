@@ -25,7 +25,7 @@
 \author[$\ast$,1]{\'Saunak Sen}
 
 \affil[$\ast$]{Department of Preventive Medicine, University of Tennessee Health Science Center, Memphis, TN} 
-\affil[$\dagger$]{Department of Genetics, Genomics, and Informatics, University of Tennessee Health Science Center, Memphis, TN} 
+\affil[$\dagger$]{Department of Genetics, Genomics and Informatics, University of Tennessee Health Science Center, Memphis, TN} 
 \affil[$\S$]{Department of Biostatistics, University of Wisconsin-Madison, Madison, WI}
 
 
@@ -43,19 +43,20 @@
 \runningauthor{Hu \textit{et al.}}
 
 \begin{abstract}
-The BXD strains are an important reference population of
-recombinant inbred lines which have been phenotyped extensively.
+The BXD strains of mice are an important reference population for
+systems biology and genetics that have been full sequenced and deeply phenotyped.
 To facilitate interactive use of genotype-phenotype relationships
-in this population, we sought to speed up eQTL scans where we
-perform a univariate genome scan for every trait in a collection
-of omic traits.  By using easily parallelizable operations such as
+in this family, we sought to develop new algorithms and code to enable
+high performance whole genome QTL scan for massive omics data sets of up to 1 million 
+traits. By using easily parallelizable operations including
 matrix multiplication, vectorized operations, and elementwise
-operations, we are able to decrease runtimes approaching real-time
-computation.  We used parallelization using different CPU threads
-as well as GPUs.  We found that the speed advantage of GPUs is
-dependent on problem size and shape.  These results indicate a pathway for
-speeding up eQTL scans using LMMs.  Our implementation is in the
-Julia programming language.
+operations, we have been able to decrease runtimes approaching real-time
+computation, making this code ideal for interactive web services, such as
+GeneNetwork.org. We used parallelization of different CPU threads
+as well as GPUs. We found that the speed advantage of GPUs is
+dependent on problem size and shape (n of cases, n of genotypes, n of traits).  
+Our results provide a clear path for speeding up eQTL scans using LMMs. 
+Our implementation is in the Julia programming language.
 \end{abstract}
 
 \begin{document}
