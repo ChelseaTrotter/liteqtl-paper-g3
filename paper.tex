@@ -10,7 +10,7 @@
 \usepackage{verbatim}
 \usepackage{multirow}
 %\usepackage{listings}
-\usepackage{minted}
+\usepackage[cache=false]{minted}
 \newcommand{\code}{\texttt}
 
 
@@ -85,7 +85,7 @@ previously-collected phenotypes.  For ``omic'' phenotypes collected
 using high-throughput technologies additional analyses (such as
 transcriptional network construction or causal mediation analyses) are
 possible.  The GeneNetwork project ({\tt http://gn2.genenetwork.org})
-seeks to faculitate this process by providing a searchable database of
+seeks to facilitate this process by providing a searchable database of
 phenotypes and genotypes in a variety of organisms (including mouse,
 rat, and Arabidopsis).  It provides a suite of interactive tools for
 browsing the data, QTL mapping, correlational analyses, network
@@ -210,7 +210,7 @@ Besides the hardware requirement, CUDA is also mature and has been recongnized i
 \textit{cuBLAS} \citep{cublas} library is a fast GPU implementation of the BLAS from Nvidia. 
 For matrix operations on GPU, we used cuBLAS library. 
 
-Not only we want to see how much speed up we can get from using GPU, but also experiemnt whether the shape of matrix will affect the speedup. 
+Not only we want to see how much speed up we can get from using GPU, but also experiment whether the shape of matrix will affect the speedup. 
 Of course, most of the time, one can not pick and choose the size and shape of data in matrix form, 
 but such information would help researchers as a rough guidance of whether it is worth it to consider the GPU option before investing programming effort for GPU. 
 We run matrix multiplication with different shapes matrices, and compared the running time of CPU and GPU. 
@@ -243,7 +243,7 @@ Matrix multiplication is up to 5 times faster on GPU compared to 16 threaded CPU
 % Faster and memory efficient; may be less accurate, but acceptable for quick scan
 Precision means the smallest difference between two representable numbers.
 Floating point numbers, in scientific computing, are usually stored in double presicision. 
-Double precision floating point numebrs takes up 8 bytes in memory, while single precision takes up 4 bytes. 
+Double precision floating point numbers takes up 8 bytes in memory, while single precision takes up 4 bytes. 
 In addition to the difference in storing size, the speed for calculation using single and double precision also varies depending on hardware. 
 For example, the GPU throughput (number of floating point calculation per second, measured in FLOPS) for double precision is 1/32 of single precision on a Nvidia GTX 1050 GPU, and 1/4 on a Nvidia Tesla K80. 
 Differences in optimization techniques, underlying architecture cause such performance gap. 
@@ -347,7 +347,7 @@ For BXD spleen dataset, the Y' and G matrix is about 40MB %TODO: double check on
 , while R matrix is about 4GB. 
 Data offloading is the main bottleneck for our GPU implementation. 
 
-To cope with this limitaion of GPU, we further developed \textit{Find Max LOD} method, because main interest of genome scan is to find the maximum LOD score of every phenotype. 
+To cope with this limitation of GPU, we further developed \textit{Find Max LOD} method, because main interest of genome scan is to find the maximum LOD score of every phenotype. 
 This step is highly parallelizable and can utilize GPU's massive cores, at the same time, reduce the amount of data needed to be transfered back to host. 
 Table \ref{tab:speedup-table} shows that \textit{Find Max LOD} method for spleen data reduces CPU\&GPU execution time down to 0.079 second when using double precision. 
 Compared to CPU only, which took 0.55 seconds, this GPU modification provides 7 times speedup. 
