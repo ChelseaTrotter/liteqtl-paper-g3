@@ -97,14 +97,14 @@ important genetic reference populations such as the BXD population.
 %% Computational demands in omics are growing exponentially. For
 %% instance, eQTL analysis requires processing genomewide expression and
 %% marker data; this can take minutes, hours or days depending on problem
-%% size.  Scientists want to intereact with the results and real-time
+%% size.  Scientists want to interact with the results and real-time
 %% processing would be valuable.  Our goal is to build a backend for
 %% GeneNetwork that will enable real-time genome scans for important
 %% genetic reference populations such as the BXD population.
 
 To perform eQTL scans in the BXD population, one has to simply perform
 as many genome scans as there are phenotypes.  This can be done in an
-``embarassingly parallel'' fashion by using standard algorithms for
+``embarrassingly parallel'' fashion by using standard algorithms for
 QTL analysis, such as those employed by R/qtl (cite).  In practice,
 this is too slow, and substantial speedups are possible.  [Mention
   ideas that have been used before] For example, by using the
@@ -175,7 +175,7 @@ Figure \ref{MatrixMult} shows the data layout.
 	
 	\caption{Schematic of data and correlation calculation: $Y$ is
 		the expression phenotype matrix, $G$ is the matrix of
-		genotytpes, and $R=Y^{\prime}G$ is the matrix of
+		genotypes, and $R=Y^{\prime}G$ is the matrix of
 		correlations.  The LOD scores are a function of the
 		correlation matrix.}
 	\label{MatrixMult}
@@ -190,23 +190,23 @@ We used various techniques to accelerate eQTL scans.
  Such requirement sets up the standard that the genome scan must finish within seconds.
  To bring out the best performance of CPU, we use multithreaded operations whenever possible. 
  Julia \citep{bezanson2017julia}, our choice of programming language, provide simple yet safe syntax for multithreading. 
- It is simply done by adding \code{Threads.@thread} macro to indicate to Julia that the following \code{for} loop is multhreaded region. 
+ It is simply done by adding \code{Threads.@thread} macro to indicate to Julia that the following \code{for} loop is multithreaded region. 
  Using \code{Threads.nthreads()} function can show the number of threads in julia, and the default number of threads we use is 16 threads. 
   
  
 \subsubsection{Matrix and Vectorized Operations}
 
 % OpenBLAS for multi-threaded matrix operations. 
-Since our algorithm largely depends on matrix operations, it is natual to find the fastest way to achieve best result, regardless of computing platform. 
+Since our algorithm largely depends on matrix operations, it is natural to find the fastest way to achieve best result, regardless of computing platform. 
 There are various matrix libraries available for CPU, such as gslBLAS and OpenBLAS \citep{wang2013augem}. 
 They target different hardware or use various techniques to get highly optimal results. 
 The matrix multiplication in OpenBLAS is default multithreaded, therefore does not require extra coding effort to make the CPU version of matrix multiplication run in parallel.
 We chose OpenBLAS as CPU computing library.  
 
-Matrix multiplication and element-wise operation are algorithmically free of data and function dependency, it is amendable to GPU's parallel computing power.
+Matrix multiplication and element-wise operation are algorithmically free of data and function dependency, it is amenable to GPU's parallel computing power.
 Julia provides various packages for GPU including CUDA \citep{Nickolls:2008:SPP:1365490.1365500}, OpenCL bindings. 
-Our chosen hardware for GPU is from Nvidia, which requires their propriatory library CUDA. 
-Besides the hardware requirement, CUDA is also mature and has been recongnized in the scientific computing community. 
+Our chosen hardware for GPU is from Nvidia, which requires their proprietary library CUDA. 
+Besides the hardware requirement, CUDA is also mature and has been recognized in the scientific computing community. 
 \textit{cuBLAS} \citep{cublas} library is a fast GPU implementation of the BLAS from Nvidia. 
 For matrix operations on GPU, we used cuBLAS library. 
 
@@ -242,7 +242,7 @@ Matrix multiplication is up to 5 times faster on GPU compared to 16 threaded CPU
 \subsubsection{Single precision}
 % Faster and memory efficient; may be less accurate, but acceptable for quick scan
 Precision means the smallest difference between two representable numbers.
-Floating point numbers, in scientific computing, are usually stored in double presicision. 
+Floating point numbers, in scientific computing, are usually stored in double precision. 
 Double precision floating point numbers takes up 8 bytes in memory, while single precision takes up 4 bytes. 
 In addition to the difference in storing size, the speed for calculation using single and double precision also varies depending on hardware. 
 For example, the GPU throughput (number of floating point calculation per second, measured in FLOPS) for double precision is 1/32 of single precision on a Nvidia GTX 1050 GPU, and 1/4 on a Nvidia Tesla K80. 
@@ -255,10 +255,10 @@ Considering the storage size, data transfer speed and throughput, single precisi
 %Specialized computations such as matrix multiplications and element-wise operations; requires additional programming effort
 Originally used in graphics, GPU has taken off as a general computing device in recent years because of its massive number of cores at a lower price range, and fast GPGPU libraries such as CUDA and OpenCL.
 Based on our profiling result, the time consuming parts of our genome scan method are matrix multiplication and element-wise operations. 
-Both are amendable to GPU's heterogeneous computing architecture, since they have no data race conditions and low data dependencies. 
+Both are amenable to GPU's heterogeneous computing architecture, since they have no data race conditions and low data dependencies. 
 However, GPU also has its own limitations. 
-To truely utilize the maximum computing power of GPU, one needs to think creatively to work around such limitations from GPU. 
-For example, during our experiemnt, memory transfer between host and device is really slow. 
+To truly utilize the maximum computing power of GPU, one needs to think creatively to work around such limitations from GPU. 
+For example, during our experiment, memory transfer between host and device is really slow. 
 Profiling result shows that 98\% of total genome scan time is spent on memory transfer. 
 To cope with this limitation, instead of off-loading the entire correlation matrix, we use GPU to calculate the max lod score of each phenotype, and output the max. 
 
@@ -266,7 +266,7 @@ To cope with this limitation, instead of off-loading the entire correlation matr
 %Programming simplicity of interpreted languages with speed approaching compiled languages; GPU programming and linear algebra straightforward
 In our experiment of matrix multiplication, Julia's speed is comparable to C/C++. 
 However, the low learning curve, clean syntax, as well as support to GPU programming libraries such as CUDAnative \citep{CUDAnative.jl-2018} and CuArrays affords much lower programming efforts compared to C/C++.
-Compared to writting GPU functions in C/C++, writing in Julia is cleaner and easier, because it requires much less boiler plate code.
+Compared to writing GPU functions in C/C++, writing in Julia is cleaner and easier, because it requires much less boiler plate code.
 Below is some code snippets to demonstrate GPU code, calling library or writing custom kernel in Julia. 
 
 \inputminted{julia}{code/gpu.jl}
@@ -322,19 +322,19 @@ Using single precision provides benefits in 3 aspects: memory storage, data tran
 \subsection{Benefit of using GPU}
 In parallel computing, Amdahl's law is used to find the theoretical maximum speedup by improving a particular part of a program.  
 For example, if a program took ten minutes for a serial processor, and a function that takes nine our of those ten minutes can be parallelized, then, the theoretical speedup, no matter how many processors are used, can not be more than ten times, because the minimum execution time of this program is one minute. 
-Therefore, profiling the entire genome scan process is the prerequisit in order to begin the optimization. 
+Therefore, profiling the entire genome scan process is the prerequisite in order to begin the optimization. 
 Often, profiling would consider space and time complexity. 
 Our primary concern is the time taken by each function, therefore only timing information is considered in our profiling. 
 We used Julia's built-in Sampling Profiler to find our target function for GPU because it is less intrusive compared to other profiling methods. 
 
 The genome scan process includes the following steps:
 \begin{itemize}
-	\item Calculate standadized matrix for input matrices.
+	\item Calculate standardized matrix for input matrices.
 	\item Get correlation matrix
-	\item Caclulate LOD score
+	\item Calculate LOD score
 \end{itemize}
 Our profiling result shows that step two and three takes up 90\% of time, and both involve parallelizable matrix operations. 
-So they are our candidates for GPU accleration.
+So they are our candidates for GPU acceleration.
 To make fair comparison for CPU and GPU, the timing shown in Table \ref{tab:speedup-table} is the total execution time for genome scan. 
 The \textit{No Find Max LOD} method shows the timing when running the scan with \textit{CPU only} and \textit{CPU\&GPU}.
 As the table shows, the CPU\&GPU combination did not show any improvement over the serial version (CPU only) in terms of time. 
@@ -348,7 +348,7 @@ For BXD spleen dataset, the Y' and G matrix is about 40MB %TODO: double check on
 Data offloading is the main bottleneck for our GPU implementation. 
 
 To cope with this limitation of GPU, we further developed \textit{Find Max LOD} method, because main interest of genome scan is to find the maximum LOD score of every phenotype. 
-This step is highly parallelizable and can utilize GPU's massive cores, at the same time, reduce the amount of data needed to be transfered back to host. 
+This step is highly parallelizable and can utilize GPU's massive cores, at the same time, reduce the amount of data needed to be transferred back to host. 
 Table \ref{tab:speedup-table} shows that \textit{Find Max LOD} method for spleen data reduces CPU\&GPU execution time down to 0.079 second when using double precision. 
 Compared to CPU only, which took 0.55 seconds, this GPU modification provides 7 times speedup. 
 As we mentioned earlier, since we are porting the computation to GPU which took 90\% of total execution time, according to Amdahl's Law, the theoretical maximum speed up is 10 times. 
@@ -357,7 +357,7 @@ For hippocampus datasets, which contains over 1 million phenotypes, the GPU Find
 As a backend service to a website, this wait time is much more preferable than the CPU timing for real time interactions. 
 
 \subsection{Software Availability}
-The source code for this package is publically available on Bitbucket: \url{https://bitbucket.org/Xiaoqi-hu/lm-gpu}.
+The source code for this package is publicly available on Bitbucket: \url{https://bitbucket.org/Xiaoqi-hu/lm-gpu}.
 This repository contains three folders: \textit{data}, \textit{src} and \textit{test}. 
 Using Julia language and running \code{test.jl} in \textit{test} folder will run our method using either spleen data and hippocampus data in \textit{data} folder. 
 
