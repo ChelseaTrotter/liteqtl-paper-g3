@@ -1,0 +1,15 @@
+Comments and Suggestions
+========================
+
+Line[30-39 page-2]: I think it is important to mention why OpenBlas was chosen over the MKL library.
+
+Line[57-36 page-3]: The paragraph "Benefit of using linear model" does not mention the benefits of using a linear model; maybe we can change the title or add more information.
+
+Line[64-69 page-3]: The paragraph [5-18 page-3] states clearly why using single precision instead of double precision is faster, but nothing is mention about the trade-off speed-precision. As to how changing to single precision is affecting OR not the results compared to double precision.  
+
+In results: Verb tense should be revised to be more consistent. The present tense is used sometimes although the past tense should be more appropriate, in my opinion.  
+
+Line[22 page-4]:"Result is, 98% of time is spent on data transfer from GPU to CPU (device to host)." => 
+        "The result is that 98% of the overall GPU time is spent on data transfer from GPU to CPU (device to host)."
+
+
