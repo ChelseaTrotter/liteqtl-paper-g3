@@ -7,6 +7,6 @@ paper.fls
 paper.log
 paper.out
 paper.pdf
-*.ipynb
+*.fork
 
 
