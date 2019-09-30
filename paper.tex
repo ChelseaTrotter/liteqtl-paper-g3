@@ -1,3 +1,6 @@
+% !TeX document-id = {a69d50eb-b7fd-4cc1-86b3-4b24edd99f0d}
+% !TeX TXS-program:compile = txs:///pdflatex/[--shell-escape]
+
 \documentclass[9pt,twocolumn,twoside,lineno]{gsag3jnl}
 
 \articletype{inv} % article type
@@ -43,7 +46,7 @@
 \runningauthor{Hu \textit{et al.}}
 
 \begin{abstract}
-The BXD strains of mice are an important reference population for
+The BXD recombinant inbred strains of mice are an important reference population for
 systems biology and genetics that have been full sequenced and deeply phenotyped.
 To facilitate interactive use of genotype-phenotype relationships
 in this family, we sought to develop new algorithms and code to enable
@@ -55,7 +58,7 @@ computation, making this code ideal for interactive web services, such as
 GeneNetwork.org. We used parallelization of different CPU threads
 as well as GPUs. We found that the speed advantage of GPUs is
 dependent on problem size and shape (n of cases, n of genotypes, n of traits).  
-Our results provide a clear path for speeding up eQTL scans using LMMs. 
+Our results provide a clear path for speeding up eQTL scans using Linear Mixed Model. 
 Our implementation is in the Julia programming language.
 \end{abstract}
 
@@ -139,7 +142,7 @@ since most phenotype-marker associations are null, we examined the
 impact of storage precision, and only returning the highest
 association (LOD) score for each phenotype instead of a matrix of LOD
 scores for every pair of marker and phenotypes.  With these efforts,
-we find that it is possible to perform perform real-time eQTL scans
+we find that it is possible to perform real-time eQTL scans
 for the BXD population.
 
 \section{Methods and Data}
@@ -208,7 +211,7 @@ We used various techniques to accelerate eQTL scan.
 % OpenBLAS for multi-threaded matrix operations. 
 Since our algorithm largely depends on matrix operations, it is natural to find the fastest way to achieve best result, regardless of computing platform. 
 There are various matrix libraries available for CPU, such as gslBLAS and OpenBLAS \citep{wang2013augem}. 
-They target different hardware or use various techniques to get highly optimal results. 
+They target different hardware or use various techniques to get optimal results. 
 The matrix multiplication in OpenBLAS is default multithreaded and therefore does not require extra coding effort to make the CPU version of matrix multiplication run in parallel.
 We chose OpenBLAS as CPU computing library.  
 
@@ -275,12 +278,11 @@ To cope with this limitation, instead of off-loading the entire correlation matr
 \subsubsection{Julia language}
 %Programming simplicity of interpreted languages with speed approaching compiled languages; GPU programming and linear algebra straightforward
 In our experiment of matrix multiplication, Julia's speed is comparable to C/C++. 
-However, the low learning curve, clean syntax, as well as support to GPU programming libraries such as CUDAnative \citep{CUDAnative.jl-2018} and CuArrays affords much lower programming efforts compared to C/C++.
+However, the low learning curve, clean syntax, as well as support to GPU programming libraries such as CUDAnative \citep{CUDAnative.jl-2018} and CuArrays \citep{cuarray} affords much lower programming efforts compared to C/C++.
 Compared to writing GPU functions in C/C++, writing in Julia is cleaner and easier because it requires much less boiler plate code.
 Below is some code snippets to demonstrate GPU code, calling library or writing custom kernel in Julia. 
 
 \inputminted{julia}{code/gpu.jl}
-%TODO: Add reference to CUDAnative and CuArrays
 
 \subsection{Information and Availability of Datasets}
 
@@ -355,7 +357,7 @@ We used a GPU profiler \textit{nvprof} \cite{nvprof}
 to investigate what is the bottleneck of GPU. 
 The result is, 98\% of the time is spent on data transfer from GPU to CPU (device to host).
 As shown in Figure \ref{MatrixMult}, the input matrices Y' and G are small compared to the output matrix R.
-For BXD spleen dataset, the Y' and G matrix is about 40MB %TODO: double check on this number 
+For BXD spleen dataset, Y' matrix is 17 MB, G matrix is 21 MB
 while R matrix is about 4GB. 
 Data offloading is the main bottleneck for our GPU implementation. 
 
