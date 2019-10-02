@@ -32,7 +32,7 @@
 \affil[$\S$]{Department of Biostatistics, University of Wisconsin-Madison, Madison, WI}
 
 
-\keywords{Linear Model \\ Genome Scan \\ GPU}
+\keywords{Linear Model \\ Genome Scan \\ BXD \\ GPU}
 
 
 \runningtitle{Speeding up eQTL scans in the BXD population using GPU} % For use in the footer 
@@ -44,6 +44,39 @@
 % \runningauthor{FirstAuthorLastname and SecondAuthorLastname}
 %% last name of the first author followed by et al, if more than two authors.
 \runningauthor{Hu \textit{et al.}}
+
+% This paper aims to answer three questions :
+% 1: Why BXD : reference population
+% 2: Why Speed up : GN backend and benefit other researchers
+% 3: Why GPU: Growth of CPU computing is slowing down, GPU as a new computing platform is competitive, low cost per core, and faster. 
+
+% Paper Layout:
+% Abstract 
+% Intro: 
+%P1: Why BXD; 
+%P2: Why Speed Up; 
+%P3: Why GPU 
+%P4: Other works. 
+%P5: Outline of Paper
+
+% Method: 
+%P1: Intro to LM and Acceleration techniques; 
+%P2: Data Layout; 
+%P3: LM; 
+%P4: Covariates
+%P4 Acceleration Techniques; 
+
+% Result: 
+%P1: Linear Model; 
+%P2: Result from using different acceleration techniques; 
+%P3: Computing platform. 
+%P4: Software Availability; 
+%P5: Data Availability
+
+% Conclusion: 
+%P1: Our final result from acceleration. 
+%P2: Limitations; 
+%P3: Future work.
 
 \begin{abstract}
 The BXD recombinant inbred strains of mice are an important reference population for
@@ -77,48 +110,53 @@ Our implementation is in the Julia programming language.
 %\equalcontrib{2}
 
 \correspondingauthoraffiliation{1}{Corresponding author: Saunak Sen, Department of Preventive Medicine, University of Tennessee Health Science Center, Memphis, TN. sen@uthsc.edu}
-\vspace{-34pt}% Only used for adjusting extra space in the left column of the first page
+\vspace{-23pt}% Only used for adjusting extra space in the left column of the first page
 
+%Why BXD
 \noindent The BXD mouse strains are an important set of recombinant
 inbred lines with deep phenotypic characterization.  Since the strains
 have been genotyped and sequenced, once a set of strains is
-phenotyped, the data can be immediately used for QTL (quantitative
-trait locus) mapping, and associational analysis with
+phenotyped, the data can be immediately used for quantitative
+trait locus (QTL) mapping, and associational analysis with
 previously-collected phenotypes.  For ``omic'' phenotypes collected
 using high-throughput technologies, additional analyses (such as
 transcriptional network construction or causal mediation analyses) are
-possible.  The GeneNetwork project ({\tt http://gn2.genenetwork.org})
+possible.  
+
+%Why Speed Up
+The GeneNetwork project (\url{http://gn2.genenetwork.org})
 seeks to facilitate this process by providing a searchable database of
 phenotypes and genotypes in a variety of organisms (including mouse,
 rat, and Arabidopsis).  It provides a suite of interactive tools for
 browsing the data, QTL mapping, correlational analyses, network
-construction, and genome browsing.  Our goal is to develop a real-time
+construction, and genome browsing. Our goal is to develop a real-time
 backend for GeneNetwork to perform eQTL analysis (where we perform
 single-trait QTL mapping for thousands of ``omic'' traits) for
 important genetic reference populations such as the BXD population.
 
-%% Computational demands in omics are growing exponentially. For
-%% instance, eQTL analysis requires processing genomewide expression and
-%% marker data; this can take minutes, hours or days depending on problem
-%% size.  Scientists want to interact with the results and real-time
-%% processing would be valuable.  Our goal is to build a backend for
-%% GeneNetwork that will enable real-time genome scans for important
-%% genetic reference populations such as the BXD population.
+%Why GPU?
+Processing large data set has been a challenge for genome scan. 
+We were blessed with Moore's Law for decades, but the Central Processing Unit (CPU) is reaching to its physical limit of transistors. 
+Graphics Processing Unit (GPU), originally used as an image processing component of a computer, has shown some compelling results of accelerating computation in various fields.
+General Purpose computing Graphics Processor (GPGPU) became popular in the early 2000s because of its ability to natively handel matrix and vector operations. 
+Such power is very attractive to the scientific computing community. 
+BXD genome scan can be simplified down to matrix operations, which is quite amendable to GPU computing. 
 
+%Other Works
 To perform eQTL scans in the BXD population, one has to simply perform
 as many genome scans as there are phenotypes.  This can be done in an
 ``embarrassingly parallel'' fashion by using standard algorithms for
-QTL analysis, such as those employed by R/qtl (cite).  In practice,
+QTL analysis, such as those employed by R/qtl \citep{broman2003r}.  In practice,
 this is too slow, and substantial speedups are possible.  [Mention
   ideas that have been used before] For example, by using the
-Haley-Knott algorithms using genotype probabilities on batches of
+Haley-Knott algorithms \citep{haley1992simple} using genotype probabilities on batches of
 phenotypes with the same missing data pattern, instead of using the EM
-algorithm on each phenotype individually, substantial speedups are
-possible.  This is a well-known trick and is used by R/qtl.
+algorithm \citep{lander1989mapping} on each phenotype individually, substantial speedups are
+possible. This is a well-known trick and is used by R/qtl.
 Additionally, if only additive effects are tested, or if the
 population has only two genotype categories (as in a backcross or
 recombinant inbred line), then matrix multiplication can be used to
-perform Haley-Knott regression \citep{shabalin2012matrix}.  
+perform Haley-Knott regression.
 
 The matrix multiplication with large matrices is the most computationally intensive and time-consuming 
 to perform eQTL analysis.  By dividing large matrices into small block matrices, 
@@ -126,7 +164,7 @@ one can achieve striking efficiency in matrix multiplication in conjunction with
 Intel Kernel Math Library (KML) in Revolution R/Matlab, or even GPU CUDA in Matlab.  
 For instance, GOTO BLAS, only available in 64 bit R only, and KML allow the use of multiple CPU cores and provide 14-17 times 
 better performance than built-in BLAS in R.  GPU-based computation shows 10 times better performance than 
-the best algorithm for the CPU for single precision even if Matlab provides GPU CUDA but limited support to it (cite : Matrix eQTL).
+the best algorithm for the CPU for single precision even if Matlab provides GPU CUDA but limited support to it  \citep{shabalin2012matrix}. 
 
 %% Compare matrix eQTL GridLMM \citep{runcie2018fast}, Bolt-LMM
 %% \citep{loh2015efficient}
@@ -187,7 +225,7 @@ Figure \ref{MatrixMult} shows the data layout.
 	
 	\caption{Schematic of data and correlation calculation: $Y$ is
 		the expression phenotype matrix, $G$ is the matrix of
-		genotypes, and $R=Y^{\prime}G$ is the matrix of
+		genotypes, and $R=Y^{*\prime}G^{*}$ is the matrix of
 		correlations.  The LOD scores are a function of the
 		correlation matrix.}
 	\label{MatrixMult}
