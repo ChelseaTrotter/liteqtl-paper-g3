@@ -134,14 +134,6 @@ backend for GeneNetwork to perform eQTL analysis (where we perform
 single-trait QTL mapping for thousands of ``omic'' traits) for
 important genetic reference populations such as the BXD population.
 
-%Why GPU?
-Processing large data set has been a challenge for genome scan. 
-We were blessed with Moore's Law for decades, but the Central Processing Unit (CPU) is reaching to its physical limit of transistors. 
-Graphics Processing Unit (GPU), originally used as an image processing component of a computer, has shown some compelling results of accelerating computation in various fields.
-General Purpose computing Graphics Processor (GPGPU) became popular in the early 2000s because of its ability to natively handel matrix and vector operations. 
-Such power is very attractive to the scientific computing community. 
-BXD genome scan can be simplified down to matrix operations, which is quite amendable to GPU computing. 
-
 %Other Works
 To perform eQTL scans in the BXD population, one has to simply perform
 as many genome scans as there are phenotypes.  This can be done in an
@@ -161,10 +153,21 @@ perform Haley-Knott regression.
 The matrix multiplication with large matrices is the most computationally intensive and time-consuming 
 to perform eQTL analysis.  By dividing large matrices into small block matrices, 
 one can achieve striking efficiency in matrix multiplication in conjunction with built-in BLAS in R, 
-Intel Kernel Math Library (KML) in Revolution R/Matlab, or even GPU CUDA in Matlab.  
-For instance, GOTO BLAS, only available in 64 bit R only, and KML allow the use of multiple CPU cores and provide 14-17 times 
-better performance than built-in BLAS in R.  GPU-based computation shows 10 times better performance than 
-the best algorithm for the CPU for single precision even if Matlab provides GPU CUDA but limited support to it  \citep{shabalin2012matrix}. 
+Intel Kernel Math Library (KML) in Revolution R/Matlab, or even in Matlab using CUDA.  
+%For instance, GOTO BLAS, only available in 64 bit R only, and KML allow the use of multiple CPU cores and provide 14-17 times 
+%better performance than built-in BLAS in R.  GPU-based computation shows 10 times better performance than 
+%the best algorithm for the CPU for single precision even if Matlab provides GPU CUDA but limited support to it  \citep{shabalin2012matrix}. 
+
+%Why GPU?
+Processing large data set has been a challenge for genome scan. 
+We were blessed with Moore's Law for decades, but the Central Processing Unit (CPU) is reaching to its physical limit of transistors. 
+Graphics Processing Unit (GPU), originally used as an image processing component of a computer, has shown some compelling results of accelerating computation in various fields.
+General Purpose computing Graphics Processor (GPGPU) became popular in the early 2000s because of its ability to natively handel matrix and vector operations. 
+Such power is very attractive to the scientific computing community. 
+Zhang et al. \citep{zhang2015mixed} used GPU to simultaneously dissect various genetic effects with mixed linear model. 
+
+
+%previsou work on GPU
 
 %% Compare matrix eQTL GridLMM \citep{runcie2018fast}, Bolt-LMM
 %% \citep{loh2015efficient}
