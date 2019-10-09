@@ -150,10 +150,8 @@ population has only two genotype categories (as in a backcross or
 recombinant inbred line), then matrix multiplication can be used to
 perform Haley-Knott regression.
 
-The matrix multiplication with large matrices is the most computationally intensive and time-consuming 
-to perform eQTL analysis.  By dividing large matrices into small block matrices, 
-one can achieve striking efficiency in matrix multiplication in conjunction with built-in BLAS in R, 
-Intel Kernel Math Library (KML) in Revolution R/Matlab, or even in Matlab using CUDA.  
+%The matrix multiplication with large matrices is the most computationally intensive and time-consuming to perform eQTL analysis.  
+%By dividing large matrices into small block matrices, one can achieve striking efficiency in matrix multiplication in conjunction with built-in BLAS in R, Intel Kernel Math Library (KML) in Revolution R/Matlab, or even in Matlab using CUDA.  
 %For instance, GOTO BLAS, only available in 64 bit R only, and KML allow the use of multiple CPU cores and provide 14-17 times 
 %better performance than built-in BLAS in R.  GPU-based computation shows 10 times better performance than 
 %the best algorithm for the CPU for single precision even if Matlab provides GPU CUDA but limited support to it  \citep{shabalin2012matrix}. 
@@ -197,6 +195,28 @@ for the BXD population.
 %\subsection{BXD genotypes and phenotypes}
 
 %Describe genotype and phenotype data here.
+\subsection{Information about Datasets}
+
+We downloaded BXD Genotype Database (GN Accession: GN600) and two sets of gene expression data, 
+UTHSC Affy MoGene 1.0 ST Spleen (GN Accession : GN283)
+and  UMUTAffy Hippocampus Exon (GN Accession: GN206) from GeneNetwork to test our method.  
+The genotype file includes 7321 markers by 198 BXD strains, the spleen consists of 79 BXD strains by 35556 transcripts, 
+and the hippocampus does 70 BXD strains by 1,236,087 probes/probe sets.  
+Genotypes were subsetted by strains, pseudo markers were generated and added only to hippocampus data, 
+and genotype probabilities were computed accordingly.  We thus used genotypes of 79 strains by 7321 markers for the spleen data, and 
+those of 70 by 8570 for the hippocampus data for eQTL scan.  The whole cleaning process was performed using R/qtl, R/qtl2.
+
+Figure \ref{MatrixMult} shows the data layout.
+\begin{figure}[!htb]
+	
+	\caption{Schematic of data and correlation calculation: $Y$ is
+		the expression phenotype matrix, $G$ is the matrix of
+		genotypes, and $R=Y^{*\prime}G^{*}$ is the matrix of
+		correlations.  The LOD scores are a function of the
+		correlation matrix.}
+	\label{MatrixMult}
+	\includegraphics[scale = .4]{figs/YGmatrix.png}
+\end{figure}    
 
 
 \subsection{Linear Model} 
@@ -225,20 +245,14 @@ $j$-th marker. Note that this only works for one-df tests.  If $Y^{\ast}$ and $G
 trait ($Y$) and genotype ($G$) matrices, then the
 correlation matrix is simply $$R=Y ^{\ast '}G^{\ast}.$$
 %Indicate which statistical analysis has been performed and describe the method and model applied. If many genes were examined simultaneously, or many phenotypes, a multiple comparison correction should be used to control the type I error rate, or a rationale for not applying a correction must be provided. The type of correction applied should be clearly stated. It should also be clear whether the p-values reported are raw, or after correction. Corrected p-values are often appropriate, but raw p-values should be available in the supporting materials so that others may perform their own corrections. 
-Figure \ref{MatrixMult} shows the data layout.
-      \begin{figure}[!htb]
-	
-	\caption{Schematic of data and correlation calculation: $Y$ is
-		the expression phenotype matrix, $G$ is the matrix of
-		genotypes, and $R=Y^{*\prime}G^{*}$ is the matrix of
-		correlations.  The LOD scores are a function of the
-		correlation matrix.}
-	\label{MatrixMult}
-	\includegraphics[scale = .4]{figs/YGmatrix.png}
-\end{figure}    
 
 \subsection{Acceleration Techniques}
-We used various techniques to accelerate eQTL scan. 
+While it is true that many programs can achieve tens or even hundreds of speedup by utilizing GPU, the difference needs to be examined with more care. 
+Sometimes, the reported CPU time is using single thread, and multithreaded CPU time may bring the performance gap of CPU and GPU closer than claimed. 
+Also depending on the library chozen for CPU, speed might vary depending on whether the library is optimized. 
+We believe for a fair comparison, both CPU and GPU functions should be optimized at maximum speed. 
+The following section explains our efforts of optimization on CPU and GPU functions. 
+
 \subsubsection{Multithreaded CPU operations}
 % Used for multi-threaded loops whenever possible, eg. for element-wise operations. 
  Our goal is to build a backend for GeneNetwork that allows researcher to interact with data in real time. 
@@ -320,6 +334,9 @@ To cope with this limitation, instead of off-loading the entire correlation matr
 
 \subsubsection{Julia language}
 %Programming simplicity of interpreted languages with speed approaching compiled languages; GPU programming and linear algebra straightforward
+Although a programming language cannot really be classified as optimization technique, the choice of programming language can affect the speed of the program. 
+The ease of use is also considered, because the cost of any program comprises not only recurring expense of running time on a peice of hardware, but also the front load expense of programming effort. 
+Shorter development time is valuable because researchers can quickly prototype and experiment with different models.
 In our experiment of matrix multiplication, Julia's speed is comparable to C/C++. 
 However, the low learning curve, clean syntax, as well as support to GPU programming libraries such as CUDAnative \citep{CUDAnative.jl-2018} and CuArrays \citep{cuarray} affords much lower programming efforts compared to C/C++.
 Compared to writing GPU functions in C/C++, writing in Julia is cleaner and easier because it requires much less boiler plate code.
@@ -327,16 +344,6 @@ Below is some code snippets to demonstrate GPU code, calling library or writing 
 
 \inputminted{julia}{code/gpu.jl}
 
-\subsection{Information and Availability of Datasets}
-
-We downloaded BXD Genotype Database (GN Accession: GN600) and two sets of gene expression data, 
-UTHSC Affy MoGene 1.0 ST Spleen (GN Accession : GN283)
-and  UMUTAffy Hippocampus Exon (GN Accession: GN206) from GeneNetwork to test our method.  
-The genotype file includes 7321 markers by 198 BXD strains, the spleen consists of 79 BXD strains by 35556 transcripts, 
-and the hippocampus does 70 BXD strains by 1,236,087 probes/probe sets.  
-Genotypes were subsetted by strains, pseudo markers were generated and added only to hippocampus data, 
-and genotype probabilities were computed accordingly.  We thus used genotypes of 79 strains by 7321 markers for the spleen data, and 
-those of 70 by 8570 for the hippocampus data for eQTL scan.  The whole cleaning process was performed using R/qtl, R/qtl2.
 
 
 
