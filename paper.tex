@@ -165,7 +165,7 @@ Such power is very attractive to the scientific computing community.
 Zhang et al. \citep{zhang2015mixed} used GPU to simultaneously dissect various genetic effects with mixed linear model. 
 Chapuis et all. \citep{chapuis2013graphics} utilizes GPU to offset heavy computation to deploy various ways for a more pricise detection of QTLs threashold. 
 By using GPU-backed machine learning libraries like TensorFlow, Taylor-Weiner et al. \citep{taylor2019scaling} reimplemented QTL mapping  and Bayesian non-negative matrix factorization, achieving greater than 200 times speedup compared to CPU-based versions. 
-The ease of using such library will push method-development for genomeic research.
+The ease of using such library will push method-development for genomic research.
 
 %previsou work on GPU
 
@@ -185,6 +185,8 @@ association (LOD) score for each phenotype instead of a matrix of LOD
 scores for every pair of marker and phenotypes.  With these efforts,
 we find that it is possible to perform real-time eQTL scans
 for the BXD population.
+
+
 
 \section{Methods and Data}
 \label{sec:methods:Data}
@@ -342,9 +344,16 @@ However, the low learning curve, clean syntax, as well as support to GPU program
 Compared to writing GPU functions in C/C++, writing in Julia is cleaner and easier because it requires much less boiler plate code.
 Below is some code snippets to demonstrate GPU code, calling library or writing custom kernel in Julia. 
 
+
 \inputminted{julia}{code/gpu.jl}
 
+\section{Results} 
 
+%\subsection{Benefit of using linear model}
+Our method uses the linear model and simplified the genome scan process to basic matrix operations. 
+The timing of our method is shown in Table \ref{tab:speedup-table}. 
+The execution time without finding the maximum LOD score of phenotype using double precision is 0.55 second if we only use CPU. 
+Getting the same result using the same dataset from R/qtl took about 36.5 seconds. 
 
 
 \begin{table*}[htbp]
@@ -366,19 +375,13 @@ Below is some code snippets to demonstrate GPU code, calling library or writing 
 			\hline
 			
 		\end{tabularx}
-		\footnotetext[1]{There are overhead of using GPU, such as data transfer and setting up context, the timing shown for CPU \& GPU here included all overhead for fairness. We ran the genome scan process 10 times and choose the median to remove randomness of each run, and the warm up time of GPU.}
+
 		\label{tab:speedup-table}
 	\end{tableminipage}
 \end{table*}
 
  
-\section{Results} 
 
-\subsection{Benefit of using linear model}
-Our method uses the linear model and simplified the genome scan process to basic matrix operations. 
-The timing of our method is shown in Table \ref{tab:speedup-table}. 
-The execution time without finding the maximum LOD score of phenotype using double precision is 0.55 second if we only use CPU. 
-Getting the same result using the same dataset from R/qtl took about 36.5 seconds. 
 
 \subsection{Benefit of using single precision}
 Table \ref{tab:speedup-table} also shows the execution time using single and double precisions. 
@@ -401,6 +404,7 @@ The genome scan process includes the following steps:
 \end{itemize}
 Our profiling result shows that the second and third steps take up 90\% of the time and involve parallelizable matrix operations.  Hence, they are our candidates for GPU acceleration.
 To make a fair comparison of the CPU and GPU, the timing shown in Table \ref{tab:speedup-table} is the total execution time for genome scan. 
+There are overhead of using GPU, such as data transfer and setting up context, the timing shown for CPU \& GPU here included all overhead for fairness. We ran the genome scan process 10 times and choose the median to remove randomness of each run, and the warm up time of GPU.
 The \textit{No Find Max LOD} method shows the timing when running the scan with \textit{CPU only} and \textit{CPU\&GPU}.
 As the table shows, the CPU\&GPU combination did not show any improvement over the serial version (CPU only) in terms of the performance time.  That is, the former is rather slower than the latter regardless of precision for the data type.
 We used a GPU profiler \textit{nvprof} \cite{nvprof}
@@ -444,11 +448,22 @@ Software:
 
 \section{Conclusion}
 
+
+
+
+
+
+
+
+
+
 LM-GPU provides a fast backend for GeneNetwork that is powered by GPU. 
 It enables researchers to do real-time interaction with the data provided in GeneNetwork. 
 Such possibility can help researchers experiment with different parameters and results in insightful findings. 
 LM-GPU takes advantage of GPU's massive parallel computing power and Julia's elegant syntax for quick prototyping and implementing. 
 We are able to run genome scan for hippocampus data with over one million phenotypes in three seconds. 
+
+
 
 %TODO: limitations. One degree of freedom
 
