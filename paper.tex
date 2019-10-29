@@ -217,7 +217,7 @@ Figure \ref{MatrixMult} shows the data layout.
 		correlations.  The LOD scores are a function of the
 		correlation matrix.}
 	\label{MatrixMult}
-	\includegraphics[scale = .4]{figs/YGmatrix.png}
+	\includegraphics[scale = .4]{figs/YGmatrixStd.png}
 \end{figure}    
 
 
@@ -258,8 +258,8 @@ The markers ($G$) and gene expressions ($Y$) are now $Y_p =P_ZY$, $G_p= P_ZG$, r
 \subsection{Acceleration Techniques}
 While it is true that many programs can achieve tens or even hundreds of speedup by utilizing GPU, the difference needs to be examined with more care. 
 Sometimes, the reported CPU time is using single thread, and multithreaded CPU time may bring the performance gap of CPU and GPU closer than claimed. 
-Also depending on the library chosen for CPU, speed might vary depending on whether the library is optimized. 
-We believe for a fair comparison, both CPU and GPU functions should be optimized at maximum speed. 
+Also depending on the library chosen for CPU, speed might vary depending on whether the library is optimized for such computation or hardware. 
+We believe for a fair comparison, both CPU and GPU functions should be optimized at maximum performance and count in all necesary overhead. 
 The following section explains our efforts of optimization on CPU and GPU functions. 
 
 \subsubsection{Multithreaded CPU operations}
@@ -282,7 +282,7 @@ The matrix multiplication in OpenBLAS is default multithreaded and therefore doe
 We chose OpenBLAS as CPU computing library.  
 
 Matrix multiplication and element-wise operation are algorithmically free of data and function dependency, so that they are amendable to GPU's parallel computing power.
-Julia provides various packages for GPU including CUDA \citep{Nickolls:2008:SPP:1365490.1365500}, OpenCL bindings. 
+Julia provides various packages for GPU including CUDA \citep{Nickolls:2008:SPP:1365490.1365500} bindings. 
 Our chosen hardware for GPU is from Nvidia, which requires its proprietary library CUDA. 
 Besides the hardware requirement, CUDA is also mature and has been recognized in the scientific computing community. 
 \textit{cuBLAS} \citep{cublas} library is a fast GPU implementation of the BLAS from Nvidia. 
@@ -344,15 +344,9 @@ To cope with this limitation, instead of off-loading the entire correlation matr
 \subsubsection{Julia language}
 %Programming simplicity of interpreted languages with speed approaching compiled languages; GPU programming and linear algebra straightforward
 Although a programming language cannot really be classified as optimization technique, the choice of programming language can affect the speed of the program. 
-The ease of use is also considered, because the cost of any program comprises not only recurring expense of running time on a peice of hardware, but also the front load expense of programming effort. 
-Shorter development time is valuable because researchers can quickly prototype and experiment with different models.
-In our experiment of matrix multiplication, Julia's speed is comparable to C/C++. 
-However, the low learning curve, clean syntax, as well as support to GPU programming libraries such as CUDAnative \citep{CUDAnative.jl-2018} and CuArrays \citep{cuarray} affords much lower programming efforts compared to C/C++.
-Compared to writing GPU functions in C/C++, writing in Julia is cleaner and easier because it requires much less boiler plate code.
-Below is some code snippets to demonstrate GPU code, calling library or writing custom kernel in Julia. 
+Ease of use is also considered, because the cost of any program comprises not only recurring expense of running time on a peice of hardware, but also the front load expense of programming effort. 
+Shorter development time is valuable because researchers can quickly prototype and experiment with different models, but performance should also be equally important, if not more, 
 
-
-\inputminted{julia}{code/gpu.jl}
 
 \section{Results} 
 
@@ -431,6 +425,16 @@ We got 7 times speed up for genome scan using GPU.
 For hippocampus data, which contains over 1 million phenotypes, the GPU Find Max implementation took 3.51 seconds for double precision, and 2.26 seconds for single precision. 
 As a backend service to a website, this wait time is much more preferable than the CPU timing for real time interactions. 
 
+\subsection{Benefit of using Julia}
+In our experiment of matrix multiplication, Julia's speed is comparable to C/C++. 
+However, the low learning curve, clean syntax, as well as support to GPU programming libraries such as CUDAnative \citep{CUDAnative.jl-2018} and CuArrays \citep{cuarray} affords much lower programming efforts compared to C/C++.
+Compared to writing GPU functions in C/C++, writing in Julia is cleaner and easier because it requires much less boiler plate code.
+Below is some code snippets to demonstrate GPU code, calling library or writing custom kernel in Julia. 
+The first example illustrates how to call CUBLAS from Julia, second exaple shows how to write custome kernel in Julia. 
+For reason of page limitation, we will not show the corresponding C code. 
+An example of using CuBLAS with C can be found online \citep{cublas-example-code}. 
+\inputminted{julia}{code/gpu.jl}
+
 \subsection{Software Availability}
 The source code for this package is publicly available on Bitbucket: \url{https://bitbucket.org/Xiaoqi-hu/lm-gpu}.
 This repository contains three folders: \textit{data}, \textit{src} and \textit{test}. 
@@ -454,14 +458,6 @@ Software:
 \end{itemize}
 
 \section{Conclusion}
-
-
-
-
-
-
-
-
 
 
 LM-GPU provides a fast backend for GeneNetwork that is powered by GPU. 
