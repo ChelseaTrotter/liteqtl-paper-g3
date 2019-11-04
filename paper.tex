@@ -459,14 +459,20 @@ Software:
 
 \section{Conclusion}
 
-
-LM-GPU provides a fast backend for GeneNetwork that is powered by GPU. 
-It enables researchers to do real-time interaction with the data provided in GeneNetwork. 
+In this paper, we experimented the effect of different matrix size on GPU speed up. 
+Matrix with closer to a square shape achieves the best speed up compared to CPU. 
+With the maximum total input data size of 16 GB, matrix multiplication is up to 5 times faster on GPU than a 16 threaded CPU. 
+LM-GPU takes advantage of GPU's massive parallel computing power and Julia's elegant syntax and fast performance for quick prototyping and performance-minded implementation in one language. 
+LM-GPU also uses vairous techniques such as multi-threaded operations, and finding the maximum lod score on GPU to acheive close to real-time genome scan.
+We are able to run genome scan for spleen data set in 0.06 seconds, and hippocampus data with over one million phenotypes in 3 seconds. 
+As a backend for GeneNetwork that is powered by GPU, LM-GPU enables researchers to do real-time interaction with the data provided in GeneNetwork. 
 Such possibility can help researchers experiment with different parameters and results in insightful findings. 
-LM-GPU takes advantage of GPU's massive parallel computing power and Julia's elegant syntax for quick prototyping and implementing. 
-We are able to run genome scan for hippocampus data with over one million phenotypes in three seconds. 
 
-
+LM-GPU package also has some limitations. 
+Currently the best speed up of GPU uses an algorithm that finds the maximum lod score to minimize data transfer between GPU and CPU, which was the bottleneck for our LM algorihtm. 
+For those who are interested in the whole correlation matrix, this approach will be a limitation. 
+LM-GPU also only supports 1-degree freedom test currently, with no missing data in input dataset. 
+Currently the package only uses linear model, but we plan to add linear mixed model in future development. 
 
 %TODO: limitations. One degree of freedom
 
